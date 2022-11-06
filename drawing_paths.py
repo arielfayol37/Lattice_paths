@@ -66,17 +66,31 @@ def draw_path(pat_A,m,n,o):
         x_forward = (x_size-2*200)/m
         y_forward = (y_size-2*200)/n        
         s=turtle.Turtle()
+        s.width(1.7)
         s.color((random.random(),random.random(),random.random()))
         s.speed(10)
-        s.penup()
-        s.setposition(x_or-o, y_or-o)
-        s.pendown()        
-        for i in pat_A:
-                if i == 0:
-                        s.seth(0)
-                        s.forward(x_forward)
-                else:
-                        s.seth(90)
-                        s.forward(y_forward)
+        if pat_A[0]:
+                s.penup()
+                s.setposition(x_or-o, y_or+6.5-o)
+                s.pendown()        
+                for i in pat_A:
+                        if i == 0:
+                                s.seth(0)
+                                s.forward(x_forward)
+                        else:
+                                s.seth(90)
+                                s.forward(y_forward)
+        else:
+                s.penup()
+                s.setposition(x_or+6.5-o, y_or-o)
+                s.pendown()        
+                for i in pat_A:
+                        if i == 0:
+                                s.seth(0)
+                                s.forward(x_forward)
+                        else:
+                                s.seth(90)
+                                s.forward(y_forward)
         
         s.hideturtle()
+        #s.close()
