@@ -433,8 +433,8 @@ class Population():
                     self.battle("non_bias_random")
                     self.mating(mode)
                 else:
-                    #self.mating("random_random")
-                    self.mating("roulette") 
+                    self.mating("random_random")
+                    #self.mating("roulette") 
                 found = self.check("speedy")
 
             else:
@@ -463,5 +463,6 @@ def test(size,j,m,n,k,mode="roulette",norm=False):
     world = Population(size,m,n,k,norm=norm)
     world.num_genes =j
     best = world.evolve(mode)
+    best.draw()
     return best    
         
