@@ -463,7 +463,7 @@ class Population():
 
 
 
-def test(size,j,m,n,k,mode="roulette",norm=False):
+def test(size,j,m,n,k,mode="roulette",norm=True):
     world = Population(size,m,n,k,norm=norm)
     world.num_genes =j
     best = world.evolve(mode)
