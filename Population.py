@@ -4,7 +4,7 @@ from Sequence import Sequence
 from Sequence import generate_all_paths
 import os
 class Population():
-    def __init__(self,size, m, n, k,create_paths = True, norm = False):
+    def __init__(self,size, m, n, k,create_paths = True, norm = True):
         assert m>0 and n>0 and m>=n 
         self.individuals = []
         self.children = []
@@ -238,10 +238,10 @@ class Population():
                 sumf = 0
                 if not self.norm:
                     self.p_mating = softmax(df_scores)
-                    self.norm = True
+                   # self.norm = True
                 else:    
                     self.p_mating = normalize(df_scores)
-                    self.norm = False
+                   # self.norm = False
                 for i in range(len(self.p_mating)):
                     self.p_mating[i] = sumf + self.p_mating[i]
                     sumf = self.p_mating[i]
@@ -449,6 +449,10 @@ class Population():
                 found = self.initialize()
                 self.sorted = False
                 self.roulette_ready = False
+            if i == int(self.m**2 - self.m**2*0.7):
+                assert self.norm
+                self.norm = False
+                
  
         print("solutions = {},m = {}, n = {}, k = {}".format(self.num_genes,self.m,self.n, self.k))        
         print("size of sub-population", len(self.individuals), "best fitness", self.best_fitness)
