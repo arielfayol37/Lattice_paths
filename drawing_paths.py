@@ -40,9 +40,12 @@ def drawx(y_forward,x_or,y_or,s):
 	s.down()
 	 
 def draw_lattice(m,n):
+        canvas = turtle.Screen()
+        turtle.TurtleScreen._RUNNING=True
         s=turtle.Turtle()
+        
         s.speed(0)
-        s.width(2)
+        s.width(0.7)
         #trtl.up
         x_or =-0.5*x_size+200
         y_or = -y_size*0.5+200
@@ -59,8 +62,12 @@ def draw_lattice(m,n):
         for j in range(n+1):
                 drawx((j+1)*y_forward,x_or,y_or,s)
         s.hideturtle()
+        #canvas.exitonClick()
+        #s.close()
 #s.hideturtle()
 def draw_path(pat_A,m,n,o):
+        canvas = turtle.Screen()
+        turtle.TurtleScreen._RUNNING=True        
         x_or =-0.5*x_size+200
         y_or = -y_size*0.5+200        
         x_forward = (x_size-2*200)/m
@@ -71,7 +78,7 @@ def draw_path(pat_A,m,n,o):
         s.speed(10)
         if pat_A[0]:
                 s.penup()
-                s.setposition(x_or-o, y_or+6.5-o)
+                s.setposition(x_or-o, y_or+10-o)
                 s.pendown()        
                 for i in pat_A:
                         if i == 0:
@@ -82,7 +89,7 @@ def draw_path(pat_A,m,n,o):
                                 s.forward(y_forward)
         else:
                 s.penup()
-                s.setposition(x_or+6.5-o, y_or-o)
+                s.setposition(x_or+10-o, y_or-o)
                 s.pendown()        
                 for i in pat_A:
                         if i == 0:
@@ -93,4 +100,5 @@ def draw_path(pat_A,m,n,o):
                                 s.forward(y_forward)
         
         s.hideturtle()
+        #canvas.exitonclick()
         #s.close()
