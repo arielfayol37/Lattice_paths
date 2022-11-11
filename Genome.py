@@ -1,6 +1,7 @@
 from Sequence import Sequence
 from lp_utils import translate
 import random
+from drawing_paths import draw_path, draw_lattice
  
 class Genome():
     def __init__(self, num_sequences, m, n, k, empty=False):
@@ -100,4 +101,12 @@ class Genome():
                 patB.append(1)
                 
         self.poison2 = translate(patB, "to_O") 
-        self.poison1 = translate(patA, "to_O")    
+        self.poison1 = translate(patA, "to_O")
+
+    def draw(self):
+        draw_lattice(self.m,self.n)
+        o = 40/self.num_sequences
+        i=-0.5*self.num_sequences
+        for seq in self.sequences:
+            draw_path(translate(seq,"to_A"),self.m,self.n,o*i)
+            i+=1     
