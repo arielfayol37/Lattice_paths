@@ -95,3 +95,21 @@ def collect_data(m,n):
         world = run(i,n,3,"roulette") 
         for k in range(3+1,i+n):
             world=run(i,n,k,"roulette", world)
+
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+def test(size,j,m,n,k,mode="roulette",norm=True):
+    world = Population(size,m,n,k,norm=norm)
+    world.num_genes =j
+    best = world.evolve(mode)
+    best.draw()
+    return best              
