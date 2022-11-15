@@ -1,7 +1,7 @@
 from lp_utils import *
 from Genome import Genome
 from Sequence import Sequence
-from Sequence import generate_all_paths
+ 
 import os
 class Population():
     def __init__(self,size, m, n, k,create_paths = True, norm = True):
@@ -458,8 +458,9 @@ class Population():
         print("size of sub-population", len(self.individuals), "best fitness", self.best_fitness)
         print("bfi, size of pop",self.bfi, len(self.individuals))
         return self.individuals[self.bfi]
-
-
+ 
+    
+    
 
 
 
@@ -467,6 +468,7 @@ def test(size,j,m,n,k,mode="roulette",norm=True):
     world = Population(size,m,n,k,norm=norm)
     world.num_genes =j
     best = world.evolve(mode)
+     
     best.draw()
     return best    
         
