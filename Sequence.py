@@ -67,25 +67,5 @@ class Sequence():
                 return 0 #returns zero if paths are different
 
         return 1 #returns one if paths are the same
-
-def generate_all_paths(m,n):
-    paths = []
-    #you can use while loop to make sure all paths are created
-    max_len = combination(m+n,n)
-    while len(paths) < max_len:
-        l = Sequence(m,n)
-        if l.terms not in paths:
-            paths.append(l.terms)
-    print(len(paths))
-    return paths
-       
-def factorial(n):
-    if n == 1:
-        return n
-    else:
-        return n * factorial(n-1)
-
-def combination(m,n):
-    assert m>=n
-    return factorial(m)/(factorial(n)*factorial(m-n))
+ 
     
