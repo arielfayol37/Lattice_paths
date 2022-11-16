@@ -1,6 +1,7 @@
 from decimal import *
 from Sequence import Sequence
 import random 
+from path_gen import LexOrderer
 
 
 def translate(patA,to_lan):
@@ -8,15 +9,18 @@ def translate(patA,to_lan):
         num_0 =0
         num_1 =0
         for i in patA:
-            if i:
+             
+            if i==1 or i=="N":
+                 
                 num_1 += 1
-            else:
+            elif i==0 or i=="E":
+                 
                 num_0 += 1
         assert num_0 >= num_1        
         patO = Sequence(num_0, num_1)
         for i in range(len(patO.terms)):
             if i!= len(patA)-1:
-                if patA[i] == 0:
+                if patA[i] == 0 or patA[i] == "E":
                     patO.terms[i][2] = 0
                     patO.terms[i+1][0] = patO.terms[i][0] + 1
                     patO.terms[i+1][1] = patO.terms[i][1]
@@ -25,7 +29,7 @@ def translate(patA,to_lan):
                     patO.terms[i+1][0] = patO.terms[i][0]
                     patO.terms[i+1][1] = patO.terms[i][1] +1
             else:
-                if patA[i] == 0:
+                if patA[i] == 0 or patA[i] == "E":
                     patO.terms[i][2] = 0
                 else:
                     patO.terms[i][2] = 1
@@ -61,7 +65,10 @@ def sume(x):
     return sume
 def dot_product(va,vb):
     vc = []
-    assert len(va) == len(vb)
+    try:
+        assert len(va) == len(vb)
+    except:
+        raise Exception("different list sizes: size(va) = ", len(va), "size(vb) = ", len(vb))
     for i in range(len(va)):
         vc.append(va[i]*0.5 + vb[i]*0.5)
     return vc
@@ -76,5 +83,49 @@ def bubble_sort(pivot,b):
                 b[j] = b[j+1]
                 pivot[j+1] = temp
                 b[j+1]= temp1
-    return (pivot, b)            
+    return (pivot, b)
+def quick_sort(array):
+    if (len(array))<2:
+        return array
+    else:
+        pivot = array[int(len(array)/2)]
+        x =pivot.fitness()[0]
+        less = [i for i in array[1:] if i.fitness()[0] < x]
+        greater = [i for i in array[1:] if i.fitness()[0]>=x]
+        to_return = quick_sort(greater) + [pivot] + quick_sort(less)
+        assert(len(to_return)) == len(array)
+        return to_return
+        
+
+def generate_all_paths(m,n):
+    paths = []
+    #you can use while loop to make sure all paths are created
+    max_len = int(combination(m+n,n))
+
+    """
+    while len(paths) < max_len:
+        l = Sequence(m,n)
+        if l.terms not in paths:
+            paths.append(l.terms)
+    """
+    l = LexOrderer(m,n)
+    w = l.__iter__()
+    for i in range(max_len):
+        
+        paths.append(translate(l.__next__(),"to_O").terms)
+
+
+    print(len(paths))
+    return paths
+       
+def factorial(n):
+    if n == 1:
+        return n
+    else:
+        return n * factorial(n-1)
+
+def combination(m:int,n:int)->int:
+    assert m>=n
+    return factorial(m)/(factorial(n)*factorial(m-n))
+    
 
