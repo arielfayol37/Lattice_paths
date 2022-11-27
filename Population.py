@@ -342,7 +342,7 @@ class Population():
                 if a >= self.best_fitness:
                     self.best_fitness = a
                     self.bfi = len(self.individuals) + len(self.children) -2#yes, minus 2 since a is appended before b
-                elif b >= self.best_fitness:
+                if b >= self.best_fitness:
                     self.best_fitness = b
                     self.bfi = len(self.individuals) + len(self.children) -1
 
