@@ -1,7 +1,11 @@
 from lp_utils import *
 from Genome import Genome
 from Sequence import Sequence
- 
+import logging
+logging.basicConfig(filename='myProgramLog.txt', level=logging.DEBUG,\
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+logging.disable(logging.CRITICAL)
+#from Sequence import generate_all_paths
 import os
 class Population():
     def __init__(self,size, m, n, k,create_paths = True, norm = True):
@@ -31,6 +35,10 @@ class Population():
             self.paths = generate_all_paths(m,n)
             self.l = len(self.paths)
         self.ci = 0   #index of path from C 
+        self.max_fitnesses = []
+        self.av_pop_fitnesses = []
+        self.av_pop_divergences = []
+        self.pool = []
 
 
 
@@ -47,7 +55,7 @@ class Population():
 
 
     def initialize(self):
-        print("refilling")
+        logging.info("refilling")
         self.just_initialized = True
          
         
@@ -55,39 +63,16 @@ class Population():
             #creating individuals which will take paths from C
             new_genome = Genome(self.num_genes,self.m,self.n,self.k, True)#Creating individual with no paths yet
             for s in range(self.num_genes):
-                new_genome.sequences[s].terms = self.paths[self.ci%self.l]
+                new_genome.sequences[s].terms = self.paths[(self.l-self.ci)%self.l]
                 self.ci+=1
             self.individuals.append(new_genome)
-            f = new_genome.fitness()[0]             
-            self.fitnesses.append(f)
-            #self.divergences.append(0) #the real divergences are calculated after initialization is complete
-
-            if f >= self.best_fitness:
-                self.best_fitness = f
-                self.bfi = len(self.individuals) -1
-                
-
-            if f == 9999:
-                new_genome.show()
-                #self.cal_div(sort = False)#method used to calculate divergences
-                return True
-            
+ 
             
         for z  in range(self.size):
             #creating random people with random paths now
             new_genome = Genome(self.num_genes,self.m,self.n,self.k)
             self.individuals.append(new_genome)
-            f = new_genome.fitness()[0]
-            self.fitnesses.append(f)
-            #self.divergences.append(0)
-            if f >= self.best_fitness:
-                self.best_fitness = f
-                self.bfi = len(self.individuals) -1
-            if f == 9999:
-                new_genome.show()
-                self.cal_div(sort = False)
-                return True
-        #self.cal_div(sort = False)
+ 
         return False
 
 
@@ -104,9 +89,13 @@ class Population():
         self.divergences=[]
         if sort:
             self.bsort()
+        sumsee=0    
         for i in range(len(self.individuals)):
-            self.divergences.append(self.individuals[i].divert(self.individuals[self.bfi]))
-
+             
+            ss= self.individuals[i].divert(self.individuals[self.bfi])
+            sumsee+=ss
+            self.divergences.append(ss)
+        self.av_pop_divergences.append(sumsee/len(self.divergences))
 
 
 
@@ -124,10 +113,12 @@ class Population():
 
 
     def bsort(self):
+        
         try:
             assert self.sorted == False
         except:
             raise Exception("Called bsort() when already sorted")
+        """    
         try:
             assert len(self.individuals) == len(self.fitnesses)
         except:
@@ -135,11 +126,18 @@ class Population():
             raise Exception("fitnesses and individuals should have\
                 the same length")
             for i in range(len(self.individuals)):
-                print(self.fitnesses[i], self.individuals[i].fitness()[0], self.divergences[i])    
+                print(self.fitnesses[i], self.individuals[i].fitness()[0], self.divergences[i])
+        """            
 
         if self.sorted==False:
-            print("sorting")
-            l = len(self.fitnesses)
+            logging.info("sorting")
+            #self.individuals = quick_sort(self.individuals)
+            
+            l = len(self.individuals)
+            self.fitnesses = []
+            for i in range(l):
+                self.fitnesses.append(self.individuals[i].fitness()[0])
+                   
             for i in range(l):
                 swapped = False
                 for j in range(0,l-i-1):
@@ -157,15 +155,23 @@ class Population():
                 
                 if swapped == False:
                     break
-            self.bfi = 0            
+                      
+            self.bfi = 0
+            self.best_fitness = self.fitnesses[0]            
             self.sorted = True
+            sumsee = 0
             for a in range(len(self.individuals)):
-
-                try:
-                    assert self.individuals[a].fitness()[0] == self.fitnesses[a]
-                except:
-                    raise Exception("difference between calculated fitness and real fitness")
-
+                sumsee+=self.fitnesses[a]                    
+                assert self.individuals[a].fitness()[0] == self.fitnesses[a],"difference between calculated fitness and real fitness"
+    
+            av = sumsee/len(self.individuals)
+            try:
+                if av==self.av_pop_fitnesses[-30]:
+                    self.norm = False
+            except:
+                pass
+            self.av_pop_fitnesses.append(av) 
+            self.max_fitnesses.append(self.best_fitness)        
 
 
 
@@ -183,7 +189,7 @@ class Population():
 
 
     def battle(self, mode = "non_bias_random"):
-        print("battling")
+        logging.info("battling")
         if mode == "non_bias_random":
             while(len(self.individuals) > self.max_size):
                 index_1 = random.randint(0, len(self.individuals)-1) #we subtract 1 bescause the randint() function includes the bounds
@@ -199,6 +205,16 @@ class Population():
                     self.fitnesses.pop(index_2)
                     self.individuals.pop(index_2)
                     #self.divergences.pop(index_2)
+
+        elif mode =="kill_bottom":
+            self.bsort()
+            bottom_index = len(self.individuals)-self.max_size
+            if bottom_index>0:
+                del self.individuals[-bottom_index:]
+                del self.fitnesses[-bottom_index:]
+
+
+
 
 
 
@@ -222,46 +238,47 @@ class Population():
 
 
     def parent_pick(self, mode = "roulette"):
-        assert len(self.fitnesses) == len(self.individuals)
+        #assert len(self.fitnesses) == len(self.individuals)
         
         if mode == "roulette":
-            
+            """ Remainder stochastic sampling without replacement"""
             if not self.roulette_ready:
-                self.cal_div(sort=True)
-                self.indexes = []
-                for v in range(len(self.fitnesses)):
-                    self.indexes.append(v)
+                self.cal_div(sort=False)
+                self.indexes = [v for v in range(len(self.individuals))]
+ 
                 assert sume(self.p_mating) != 1
                 self.p_mating = []
                 df_scores = dot_product(self.fitnesses, self.divergences)
-                df_scores, self.indexes = bubble_sort(pivot=df_scores,b=self.indexes)
-                sumf = 0
-                if not self.norm:
-                    self.p_mating = softmax(df_scores)
-                   # self.norm = True
-                else:    
+
+                if self.norm:
                     self.p_mating = normalize(df_scores)
-                   # self.norm = False
-                for i in range(len(self.p_mating)):
-                    self.p_mating[i] = sumf + self.p_mating[i]
-                    sumf = self.p_mating[i]
-                        
+                else:
+                    self.p_mating = softmax(df_scores)    
+                n = int(len(self.individuals)*1.5)
+                self.pool = []
+                assert len(self.indexes) == len(self.p_mating), "Different size between self.indexes and self.p_mating"
+                for u in range(len(self.p_mating)):
+                    self.p_mating[u] *=n
+                    whole = int(self.p_mating[u])
+                    for s in range(whole):
+                        self.pool.append(self.indexes[u])
+                    rand = int.from_bytes(os.urandom(8),byteorder="big")/((1<<64)-1)
+                    if rand<= (self.p_mating[u]-whole):#Bernoulli trial
+                        self.pool.append(self.indexes[u])    
+
                 self.roulette_ready = True
                  
-            rand1 = int.from_bytes(os.urandom(8),byteorder="big")/((1<<64)-1)
-            rand2 = int.from_bytes(os.urandom(8),byteorder="big")/((1<<64)-1)
-            parent_1_index = 0
-            parent_2_index = 1
-            assert len(self.indexes) == len(self.p_mating)
- 
-            for i in range(len(self.p_mating)):
-                if rand1 <= self.p_mating[i]:
-                    parent_1_index = self.indexes[i]
-                    break
-            for i in range(len(self.p_mating)):
-                if rand2 <= self.p_mating[i]:
-                    parent_2_index = self.indexes[i]
-                    break
+            rand1 = random.randint(0,len(self.pool)-1)
+            parent_1_index = self.pool[rand1]
+            
+            rand2 = random.randint(0,len(self.pool)-1)    
+            parent_2_index = self.pool[rand2]
+            self.pool.remove(parent_1_index)#without replacement
+            try:#in case rand1 == rand2
+                self.pool.remove(parent_2_index)#without replacement
+            except:
+                pass
+            
   
             return (parent_1_index, parent_2_index)
 
@@ -292,7 +309,7 @@ class Population():
 
 
     def mating(self, mode = "random_random"):
-        print("mating")
+        logging.info("mating")
         mating_coef = 0.7
         self.just_initialized = False 
         l = len(self.individuals)
@@ -332,30 +349,16 @@ class Population():
                     new_child_1 = new_child_1.nmutate()
                 self.children.append(new_child_1)
                 self.children.append(new_child_2)
-
-                a =new_child_1.fitness()[0]
-                b=new_child_2.fitness()[0]
-                self.c_fitnesses.append(a)
-                self.c_fitnesses.append(b) #a before b(in order in which individuals were appended)!
-                #self.c_divergences.append(0)
-                #self.c_divergences.append(0)
-                if a >= self.best_fitness:
-                    self.best_fitness = a
-                    self.bfi = len(self.individuals) + len(self.children) -2#yes, minus 2 since a is appended before b
-                if b >= self.best_fitness:
-                    self.best_fitness = b
-                    self.bfi = len(self.individuals) + len(self.children) -1
+ 
 
         self.individuals+=self.children
         self.sorted = False
         self.children = []
-        self.fitnesses += self.c_fitnesses
-        #self.divergences += self.c_divergences
-        self.c_fitnesses = []
+         
         self.r_fitnesses = []
-        self.c_divergences = []
+         
         self.roulette_ready = False
-        #self.cal_div(sort=False)
+        
       
 
 
@@ -376,8 +379,8 @@ class Population():
 
 
 
-    def check(self, mode):
-        print("checking")
+    def check(self, mode, test=True):
+        logging.info("checking\n")
 
         if mode == "roulette" or mode=="random_random":
             
@@ -391,21 +394,28 @@ class Population():
             else:
                 return False
         else:
-            for s in range(len(self.individuals)):
-                try:
-                    assert self.individuals[s].fitness()[0] == self.fitnesses[s]
-                except:    
-                    raise Exception("Difference betweenr real fitness and calculated fitness")
+            if test:
+                assert len(self.fitnesses) == len(self.individuals)
+                for s in range(len(self.individuals)):
+                    try:
+                        assert self.individuals[s].fitness()[0] == self.fitnesses[s]
+                    except:
+                        print("real: ",self.individuals[s].fitness()[0],"calculated: ",self.fitnesses[s])    
+                        raise Exception("Difference between real fitness and calculated fitness")
             if self.best_fitness == 9999:
                 assert self.individuals[self.bfi].fitness()[0] == 9999
                 self.individuals[self.bfi].show()
                 return True
             else:
-                print("({},{},{},{}) \n".format(self.num_genes,self.m,self.n,self.k))
-                print(self.bfi,self.individuals[self.bfi].fitness()[0],self.best_fitness,"\n")
-                assert self.individuals[self.bfi].fitness()[0] == self.best_fitness
+                logging.info("(num_solutions: {}, m: {}, n: {}, k: {}) \n".format(self.num_genes,self.m,self.n,self.k))
+                print("num_solutions: {}, m: {}, n: {},k: {} \n".format(self.num_genes,self.m,self.n,self.k))
+                logging.info("best index: {}, caculated_fitness:{}, best_fitness: {}\n".format(\
+                    self.bfi,self.individuals[self.bfi].fitness()[0],self.best_fitness))
+                print("bfi: ",self.bfi,"calculated_fitness: ",self.individuals[self.bfi].fitness()[0],"best_fitness: ",self.best_fitness,"\n")
+                #assert self.individuals[self.bfi].fitness()[0] == self.best_fitness
                 return False    
                 #divergences not updated at this point
+        return False        
 
 
 
@@ -426,16 +436,20 @@ class Population():
 
     def evolve(self,mode):
         found = self.initialize()
-        for i in range(1,self.m**2 *1000):
+        eons = self.m**2 *100
+        acc_gen = 0.3* self.m**2 *100
+        for i in range(1,eons):
             print(i)
             if found == False:
                 if self.just_initialized==False:
-                    self.battle("non_bias_random")
+                    self.battle("kill_bottom")
                     self.mating(mode)
+                    found = self.check("speedy",test=False)
+
                 else:
                     self.mating("random_random")
                     #self.mating("roulette") 
-                found = self.check("speedy")
+                    found = self.check("speedy",test=False)
 
             else:
                 
@@ -444,13 +458,13 @@ class Population():
                 print("solutions = {},m = {}, n = {}, k = {}".format(self.num_genes,self.m,self.n, self.k))
                 print("size of population", len(self.individuals), "best fitness", self.best_fitness)
                 return self.individuals[self.bfi]
-                
+                 
             if (i)%10 == 0:
                 found = self.initialize()
                 self.sorted = False
                 self.roulette_ready = False
-            if i == int(self.m**2 - self.m**2*0.7):
-                assert self.norm
+                self.norm = True
+            if i == int(eons - acc_gen):
                 self.norm = False
                 
  
@@ -458,17 +472,16 @@ class Population():
         print("size of sub-population", len(self.individuals), "best fitness", self.best_fitness)
         print("bfi, size of pop",self.bfi, len(self.individuals))
         return self.individuals[self.bfi]
- 
+
+
+    def visualize_evolution(self):
+        import matplotlib.pyplot as plt
+        plt.plot(range(len(self.max_fitnesses)),self.max_fitnesses,color="blue", label = "Best fitness")
+        plt.plot(range(len(self.av_pop_fitnesses)),self.av_pop_fitnesses,color="red", label = "Av pop fitness" )
+        plt.plot(range(len(self.av_pop_divergences)),self.av_pop_divergences,color="green", label="Av pop divergences")
+        plt.legend()
+        plt.title("Population improvement over generations")
+        plt.show()
+
     
     
-
-
-
-def test(size,j,m,n,k,mode="roulette",norm=True):
-    world = Population(size,m,n,k,norm=norm)
-    world.num_genes =j
-    best = world.evolve(mode)
-     
-    best.draw()
-    return best    
-        
