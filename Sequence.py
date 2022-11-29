@@ -1,7 +1,8 @@
-""" Genetic program for Maths Research:finding K distinct paths for an m by n lattice, m>=n """
+ 
 import random
 from datetime import datetime
 random.seed(getattr(datetime.now(), "microsecond"))
+from path_gen import LexOrderer
         
 
 
@@ -67,5 +68,35 @@ class Sequence():
                 return 0 #returns zero if paths are different
 
         return 1 #returns one if paths are the same
- 
+
+def generate_all_paths(m,n):
+    paths = []
+    #you can use while loop to make sure all paths are created
+    max_len = int(combination(m+n,n))
+
+    """
+    while len(paths) < max_len:
+        l = Sequence(m,n)
+        if l.terms not in paths:
+            paths.append(l.terms)
+    """
+    l = LexOrderer(m,n)
+    w = l.__iter__()
+    for i in range(max_len):
+        
+        paths.append(translate(l.__next__(),"to_O"))
+
+
+    print(len(paths))
+    return paths
+       
+def factorial(n):
+    if n == 1:
+        return n
+    else:
+        return n * factorial(n-1)
+
+def combination(m:int,n:int)->int:
+    assert m>=n
+    return factorial(m)/(factorial(n)*factorial(m-n))
     
