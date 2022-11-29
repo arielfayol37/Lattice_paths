@@ -52,12 +52,10 @@ def softmax(x):
         soft[i]/=sumo
     return soft
 def normalize(x):
-    rol = []
+    
     sumo=sume(x)
-
-    for i in x:
-        rol.append(i/sumo)
-    return rol          
+ 
+    return [i/sumo for i in x]          
 def sume(x):
     sume = 0
     for i in x:
@@ -88,10 +86,12 @@ def quick_sort(array):
     if (len(array))<2:
         return array
     else:
-        pivot = array[int(len(array)/2)]
+        pivot_point = int(len(array)/2)
+        pivot = array[pivot_point]
         x =pivot.fitness()[0]
-        less = [i for i in array[1:] if i.fitness()[0] < x]
-        greater = [i for i in array[1:] if i.fitness()[0]>=x]
+        truncated_array = array[:pivot_point] + array[pivot_point+1:]
+        less = [i for i in truncated_array if i.fitness()[0] < x]
+        greater = [i for i in truncated_array if i.fitness()[0]>=x]
         to_return = quick_sort(greater) + [pivot] + quick_sort(less)
         assert(len(to_return)) == len(array)
         return to_return
@@ -115,12 +115,12 @@ def generate_all_paths(m,n):
         paths.append(translate(l.__next__(),"to_O").terms)
 
 
-    print(len(paths))
+    #print(len(paths))
     return paths
        
 def factorial(n):
-    if n == 1:
-        return n
+    if n == 1 or n==0:
+        return 1
     else:
         return n * factorial(n-1)
 
@@ -128,4 +128,3 @@ def combination(m:int,n:int)->int:
     assert m>=n
     return factorial(m)/(factorial(n)*factorial(m-n))
     
-
