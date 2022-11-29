@@ -107,6 +107,6 @@ class Genome():
         draw_lattice(self.m,self.n)
         o = 40/self.num_sequences
         i=-0.5*self.num_sequences
-        for seq in self.sequences:
-            draw_path(translate(seq,"to_A"),self.m,self.n,o*i)
+        for seq in range(len(self.sequences)):
+            draw_path(translate(self.sequences[seq],"to_A"),self.m,self.n,o*i,seq)
             i+=1     
