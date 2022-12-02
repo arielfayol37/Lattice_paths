@@ -39,6 +39,11 @@ class Population():
         self.av_pop_fitnesses = []
         self.av_pop_divergences = []
         self.pool = []
+        self.eons = self.m**2 *100
+        self.scaled_fitnesses = []
+        self.sa, self.sb = (0,0)
+        self.min_fitness =0
+        self.c_count = 0 
 
 
 
@@ -66,12 +71,14 @@ class Population():
                 new_genome.sequences[s].terms = self.paths[(self.l-self.ci)%self.l]
                 self.ci+=1
             self.individuals.append(new_genome)
+            self.fitnesses.append(new_genome.fitness(False))
  
             
-        for z  in range(self.size):
+        for z  in range(int(0.1*self.size)):
             #creating random people with random paths now
             new_genome = Genome(self.num_genes,self.m,self.n,self.k)
             self.individuals.append(new_genome)
+            self.fitnesses.append(new_genome.fitness(False))
  
         return False
 
@@ -86,7 +93,9 @@ class Population():
 
 
     def cal_div(self, sort = True):
+        self.find_best()
         self.divergences=[]
+        
         if sort:
             self.bsort()
         sumsee=0    
@@ -97,6 +106,41 @@ class Population():
             self.divergences.append(ss)
         self.av_pop_divergences.append(sumsee/len(self.divergences))
 
+     
+         
+        assert len(self.fitnesses)==len(self.individuals), "line 108: difference in len of fitnesses and individuals"
+        av = sume(self.fitnesses)/len(self.fitnesses)
+        try:
+            if av==self.av_pop_fitnesses[-30]:
+                self.norm = False
+        except:
+            pass
+        self.av_pop_fitnesses.append(av) 
+        self.max_fitnesses.append(self.best_fitness)
+
+
+    def prescale(self):
+        uav = self.av_pop_fitnesses[-1]
+        delta = self.best_fitness - uav
+        fmultiple = 1.5 + (4.0-1.5)*self.c_count/self.eons 
+        if self.min_fitness > (fmultiple*uav - self.best_fitness)/(fmultiple - 1.0):    
+            
+            self.sa = (fmultiple - 1.0) * uav/delta
+            self.sb = uav * (self.best_fitness - fmultiple*uav)/delta
+        else:
+            delta = uav - self.min_fitness
+            self.sa = uav/delta
+            self.sb = self.min_fitness*uav*-1.0 / delta    
+
+    
+    
+    
+    
+    def scale_fitnesses(self):
+        self.prescale()
+        self.scaled_fitnesses =[]
+        for f in self.fitnesses:
+            self.scaled_fitnesses.append(self.sa*f + self.sb) 
 
 
 
@@ -136,7 +180,7 @@ class Population():
             l = len(self.individuals)
             self.fitnesses = []
             for i in range(l):
-                self.fitnesses.append(self.individuals[i].fitness()[0])
+                self.fitnesses.append(self.individuals[i].fitness(False))
                    
             for i in range(l):
                 swapped = False
@@ -159,10 +203,12 @@ class Population():
             self.bfi = 0
             self.best_fitness = self.fitnesses[0]            
             self.sorted = True
+            
+            """ 
             sumsee = 0
             for a in range(len(self.individuals)):
                 sumsee+=self.fitnesses[a]                    
-                assert self.individuals[a].fitness()[0] == self.fitnesses[a],"difference between calculated fitness and real fitness"
+                #assert self.individuals[a].fitness()[0] == self.fitnesses[a],"difference between calculated fitness and real fitness"
     
             av = sumsee/len(self.individuals)
             try:
@@ -172,14 +218,14 @@ class Population():
                 pass
             self.av_pop_fitnesses.append(av) 
             self.max_fitnesses.append(self.best_fitness)        
+            """
 
 
 
 
 
 
-
-
+  
 
 
 
@@ -244,17 +290,18 @@ class Population():
             """ Remainder stochastic sampling without replacement"""
             if not self.roulette_ready:
                 self.cal_div(sort=False)
+                self.scale_fitnesses()
                 self.indexes = [v for v in range(len(self.individuals))]
  
                 assert sume(self.p_mating) != 1
                 self.p_mating = []
-                df_scores = dot_product(self.fitnesses, self.divergences)
+                df_scores = dot_product(self.scaled_fitnesses, self.divergences)
 
                 if self.norm:
                     self.p_mating = normalize(df_scores)
                 else:
                     self.p_mating = softmax(df_scores)    
-                n = int(len(self.individuals)*1.5)
+                n = int(len(self.individuals)*1.7)
                 self.pool = []
                 assert len(self.indexes) == len(self.p_mating), "Different size between self.indexes and self.p_mating"
                 for u in range(len(self.p_mating)):
@@ -268,13 +315,13 @@ class Population():
 
                 self.roulette_ready = True
                  
-            rand1 = random.randint(0,len(self.pool)-1)
+            rand1 = random.randint(0,len(self.pool)-1)#might raise an error if pool is empty
             parent_1_index = self.pool[rand1]
             
             rand2 = random.randint(0,len(self.pool)-1)    
             parent_2_index = self.pool[rand2]
             self.pool.remove(parent_1_index)#without replacement
-            try:#in case rand1 == rand2
+            try:#in case rand1 == rand2 and pool is empty 
                 self.pool.remove(parent_2_index)#without replacement
             except:
                 pass
@@ -344,16 +391,22 @@ class Population():
                         new_child_1.sequences[s] = self.individuals[parent_2_index].sequences[s]
                         new_child_2.sequences[s] = self.individuals[parent_1_index].sequences[s]
                         
-                new_child_2= new_child_2.mutate()
+                new_child_2 = new_child_2.mutate()
                 if j%100==0:
                     new_child_1 = new_child_1.nmutate()
+                a = new_child_1.fitness(False)
+                b = new_child_2.fitness(False)
                 self.children.append(new_child_1)
                 self.children.append(new_child_2)
+                self.c_fitnesses.append(a)#you don't need tis , you can actually append directly to te oriinal lists
+                self.c_fitnesses.append(b)
  
 
         self.individuals+=self.children
         self.sorted = False
         self.children = []
+        self.fitnesses+=self.c_fitnesses
+        self.c_fitnesses = []
          
         self.r_fitnesses = []
          
@@ -373,7 +426,16 @@ class Population():
 
 
 
+    def find_best(self):
+        assert len(self.individuals)==len(self.fitnesses), "individuals list and fitnesses list are different in size"
+        self.min_fitness = self.fitnesses[0] 
+        for i in range(len(self.fitnesses)):
+            if self.fitnesses[i] >= self.best_fitness: #it as to be greater or equal to for cal_div to work properly
+                self.best_fitness = self.fitnesses[i]
+                self.bfi = i
 
+            if self.fitnesses[i] <= self.min_fitness:
+                self.min_fitness = self.fitnesses[i]           
 
 
 
@@ -394,24 +456,26 @@ class Population():
             else:
                 return False
         else:
+            self.find_best()
             if test:
-                assert len(self.fitnesses) == len(self.individuals)
+                #assert len(self.fitnesses) == len(self.individuals)
                 for s in range(len(self.individuals)):
                     try:
-                        assert self.individuals[s].fitness()[0] == self.fitnesses[s]
+                        assert self.individuals[s].fitness(False) == self.fitnesses[s]
                     except:
-                        print("real: ",self.individuals[s].fitness()[0],"calculated: ",self.fitnesses[s])    
+                        print("real: ",self.individuals[s].fitness(False),"calculated: ",self.fitnesses[s], "index: ", s)    
                         raise Exception("Difference between real fitness and calculated fitness")
+            
             if self.best_fitness == 9999:
-                assert self.individuals[self.bfi].fitness()[0] == 9999
+                assert self.individuals[self.bfi].fitness(False) == 9999
                 self.individuals[self.bfi].show()
                 return True
             else:
                 logging.info("(num_solutions: {}, m: {}, n: {}, k: {}) \n".format(self.num_genes,self.m,self.n,self.k))
                 print("num_solutions: {}, m: {}, n: {},k: {} \n".format(self.num_genes,self.m,self.n,self.k))
-                logging.info("best index: {}, caculated_fitness:{}, best_fitness: {}\n".format(\
-                    self.bfi,self.individuals[self.bfi].fitness()[0],self.best_fitness))
-                print("bfi: ",self.bfi,"calculated_fitness: ",self.individuals[self.bfi].fitness()[0],"best_fitness: ",self.best_fitness,"\n")
+                logging.info("best index: {}, caculated_fitness:{}, best_fitness: {}, sizeofPop: {}\n".format(\
+                    self.bfi,self.individuals[self.bfi].fitness(False),self.best_fitness, len(self.individuals)))
+                print("bfi: ",self.bfi,"calculated_fitness: ",self.individuals[self.bfi].fitness(False),"best_fitness: ",self.best_fitness, "sizeofPop: ", len(self.individuals), "\n")
                 #assert self.individuals[self.bfi].fitness()[0] == self.best_fitness
                 return False    
                 #divergences not updated at this point
@@ -434,15 +498,16 @@ class Population():
 
 
 
-    def evolve(self,mode):
+    def evolve(self,mode,kill_mode="non_bias_random"):
         found = self.initialize()
-        eons = self.m**2 *100
+        
         acc_gen = 0.3* self.m**2 *100
-        for i in range(1,eons):
+        for i in range(1,self.eons):
+            self.c_count = i
             print(i)
             if found == False:
                 if self.just_initialized==False:
-                    self.battle("kill_bottom")
+                    self.battle(kill_mode)
                     self.mating(mode)
                     found = self.check("speedy",test=False)
 
@@ -464,7 +529,7 @@ class Population():
                 self.sorted = False
                 self.roulette_ready = False
                 self.norm = True
-            if i == int(eons - acc_gen):
+            if i == int(self.eons - acc_gen):
                 self.norm = False
                 
  
@@ -482,6 +547,8 @@ class Population():
         plt.legend()
         plt.title("Population improvement over generations")
         plt.show()
+
+ 
 
     
     
