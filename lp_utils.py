@@ -68,7 +68,7 @@ def dot_product(va,vb):
     except:
         raise Exception("different list sizes: size(va) = ", len(va), "size(vb) = ", len(vb))
     for i in range(len(va)):
-        vc.append(va[i]*0.5 + vb[i]*0.5)
+        vc.append(va[i]*0.8 + vb[i]*0.1)
     return vc
 def bubble_sort(pivot,b):
     assert len(pivot)==len(b)
