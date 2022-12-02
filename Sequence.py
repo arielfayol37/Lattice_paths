@@ -1,4 +1,4 @@
- 
+""" Genetic program for Maths Research:finding K distinct paths for an m by n lattice, m>=n """
 import random
 from datetime import datetime
 random.seed(getattr(datetime.now(), "microsecond"))
