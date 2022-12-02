@@ -1,7 +1,7 @@
 from os import kill
 import openpyxl,time, concurrent.futures as cf
-from pop_w_replace import Population
-#from Population import Population
+#from pop_w_replace import Population
+from Population import Population
 from Sequence import Sequence
 from lp_utils import generate_all_paths, sume
 
