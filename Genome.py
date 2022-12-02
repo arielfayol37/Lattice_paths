@@ -24,21 +24,31 @@ class Genome():
             
                  
 
-    def fitness(self):
+    def fitness(self, penalty_indexes = True):
         penalty = 0
         penalty_index = []
 
-        for i in range(len(self.sequences)):
-            for j in range(i+1,len(self.sequences)):
-                xo = self.sequences[i].compare(self.sequences[j], self.k) #returns 0 if two paths(sequences) are k-equivalent
-                if xo == 0:
-                    penalty += 1
-                    penalty_index.append([i,j])
+        if penalty_indexes:
+            for i in range(len(self.sequences)):
+                for j in range(i+1,len(self.sequences)):
+                    xo = self.sequences[i].compare(self.sequences[j], self.k) #returns 0 if two paths(sequences) are k-equivalent
+                    if xo == 0:
+                        penalty += 1
+                        penalty_index.append([i,j])
 
-        if penalty ==0:#all paths are k-distinct (share at most (k-1) edges)
-            return (9999, penalty_index)
+            if penalty ==0:#all paths are k-distinct (share at most (k-1) edges)
+                return (9999, penalty_index)
 
-        return (1/penalty, penalty_index)
+            return (1/penalty, penalty_index)
+        else:
+            for i in range(len(self.sequences)):
+                for j in range(i+1,len(self.sequences)):
+                    xo = self.sequences[i].compare(self.sequences[j], self.k) #returns 0 if two paths(sequences) are k-equivalent
+                    if xo == 0:
+                        penalty += 1
+            if penalty ==0:
+                return 9999
+            return 1/penalty                        
     def divert(self,other): #calculate divergence from other set of solutions(Genome). Range of values [0,1]
         different = 0
         count = 0
@@ -58,12 +68,16 @@ class Genome():
             sequence.show()
             print("\n")
     def mutate(self):
-        if self.fitness()[-1]: #if some paths are k-equivalent
-            r = self.fitness()[-1][random.randint(0,len(self.fitness()[-1])-1)][random.randint(0,1)]
+        index_eq = self.fitness()[-1]
+         
+        if index_eq: #if some paths are k-equivalent
+            r = self.fitness()[-1][random.randint(0,len(index_eq)-1)][random.randint(0,1)]
             self.sequences[r] = Sequence(self.m, self.n)
         return self
     def nmutate(self):
-        if self.fitness()[-1]:
+        index_eq = self.fitness()[-1]
+         
+        if index_eq:
             r= random.randint(0,self.num_sequences-1)
             self.sequences[r] = Sequence(self.m, self.n)    
         return self
