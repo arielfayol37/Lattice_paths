@@ -129,8 +129,12 @@ class Population():
             self.sb = uav * (self.best_fitness - fmultiple*uav)/delta
         else:
             delta = uav - self.min_fitness
-            self.sa = uav/delta
-            self.sb = self.min_fitness*uav*-1.0 / delta    
+            if delta < 0.00001 and delta >-0.00001:
+                self.sa = 1.0
+                self.sb = 0.0
+            else:    
+                self.sa = uav/delta
+                self.sb = self.min_fitness*uav*-1.0 / delta    
 
     
     
