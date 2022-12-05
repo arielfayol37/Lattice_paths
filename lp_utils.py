@@ -1,7 +1,8 @@
+#This is lp_utils.py
 from decimal import *
 from Sequence import Sequence
 import random 
-from path_gen import LexOrderer
+ 
 
 
 def translate(patA,to_lan):
@@ -10,17 +11,17 @@ def translate(patA,to_lan):
         num_1 =0
         for i in patA:
              
-            if i==1 or i=="N":
+            if i==1 or i=="R" or i=="N":
                  
                 num_1 += 1
-            elif i==0 or i=="E":
+            elif i==0 or i=="D" or i=="E":
                  
                 num_0 += 1
         assert num_0 >= num_1        
         patO = Sequence(num_0, num_1)
         for i in range(len(patO.terms)):
             if i!= len(patA)-1:
-                if patA[i] == 0 or patA[i] == "E":
+                if patA[i] == 0 or patA[i] == "E" or patA[i] == "D":
                     patO.terms[i][2] = 0
                     patO.terms[i+1][0] = patO.terms[i][0] + 1
                     patO.terms[i+1][1] = patO.terms[i][1]
@@ -29,7 +30,7 @@ def translate(patA,to_lan):
                     patO.terms[i+1][0] = patO.terms[i][0]
                     patO.terms[i+1][1] = patO.terms[i][1] +1
             else:
-                if patA[i] == 0 or patA[i] == "E":
+                if patA[i] == 0 or patA[i] == "E" or patA[i] == "D":
                     patO.terms[i][2] = 0
                 else:
                     patO.terms[i][2] = 1
@@ -61,14 +62,14 @@ def sume(x):
     for i in x:
         sume+=i
     return sume
-def dot_product(va,vb):
+def dot_product(va,vb,a , b):
     vc = []
     try:
         assert len(va) == len(vb)
     except:
         raise Exception("different list sizes: size(va) = ", len(va), "size(vb) = ", len(vb))
     for i in range(len(va)):
-        vc.append(va[i]*0.8 + vb[i]*0.1)
+        vc.append(va[i]*a + vb[i]*b)
     return vc
 def bubble_sort(pivot,b):
     assert len(pivot)==len(b)
@@ -97,26 +98,36 @@ def quick_sort(array):
         return to_return
         
 
+
+# define a recursive function to generate the paths
+def generate_paths(current_row, current_col, path,m,n,paths = []):
+  # check if the current position is the bottommost right corner
+  if current_row == m and current_col == n:
+    # if the current position is the bottommost right corner, add the current path to the list of paths
+    paths.append(path)
+    return
+  
+  # check if we can move down
+  if current_row < m:
+    # if we can move down, generate the paths by moving down
+    generate_paths(current_row + 1, current_col, path + "D",m,n,paths)
+  
+  # check if we can move right
+  if current_col < n:
+    # if we can move right, generate the paths by moving right
+    generate_paths(current_row, current_col + 1, path + "R",m,n, paths)
+
+
 def generate_all_paths(m,n):
     paths = []
+    real_paths = []
     #you can use while loop to make sure all paths are created
     max_len = int(combination(m+n,n))
-
-    """
-    while len(paths) < max_len:
-        l = Sequence(m,n)
-        if l.terms not in paths:
-            paths.append(l.terms)
-    """
-    l = LexOrderer(m,n)
-    w = l.__iter__()
-    for i in range(max_len):
-        
-        paths.append(translate(l.__next__(),"to_O").terms)
-
-
-    #print(len(paths))
-    return paths
+    generate_paths(0,0,"", m,n, paths)
+    for p in paths:
+        real_paths.append(translate(p,"to_O"))
+    
+    return real_paths
        
 def factorial(n):
     if n == 1 or n==0:
