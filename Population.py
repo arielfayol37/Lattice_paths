@@ -8,7 +8,7 @@ logging.disable(logging.CRITICAL)
 #from Sequence import generate_all_paths
 import os
 class Population():
-    def __init__(self,size, m, n, k,create_paths = True, norm = True):
+    def __init__(self,size, m, n, k,create_paths = True, norm = True, scale=True):
         assert m>0 and n>0 and m>=n 
         self.individuals = []
         self.children = []
@@ -30,6 +30,7 @@ class Population():
         self.bfi = 0
         self.just_initialized = False
         self.norm = norm
+        self.scale = scale
         if create_paths:
             
             self.paths = generate_all_paths(m,n)
@@ -76,7 +77,10 @@ class Population():
             
         for z  in range(int(0.1*self.size)):
             #creating random people with random paths now
-            new_genome = Genome(self.num_genes,self.m,self.n,self.k)
+            new_genome = Genome(self.num_genes,self.m,self.n,self.k,True)
+            for s in range(self.num_genes):
+                new_genome.sequences[s].terms = self.paths[random.randint(0,self.l-1)]
+             
             self.individuals.append(new_genome)
             self.fitnesses.append(new_genome.fitness(False))
  
@@ -294,13 +298,16 @@ class Population():
             """ Remainder stochastic sampling without replacement"""
             if not self.roulette_ready:
                 self.cal_div(sort=False)
-                self.scale_fitnesses()
+                
                 self.indexes = [v for v in range(len(self.individuals))]
  
                 assert sume(self.p_mating) != 1
                 self.p_mating = []
-                df_scores = dot_product(self.scaled_fitnesses, self.divergences)
-
+                if self.scale:
+                    self.scale_fitnesses()
+                    df_scores = dot_product(self.scaled_fitnesses, self.divergences, 0.8, 0.2)
+                else:
+                    df_scores = dot_product(self.fitnesses, self.divergences, 0.5, 0.5)
                 if self.norm:
                     self.p_mating = normalize(df_scores)
                 else:
@@ -476,7 +483,7 @@ class Population():
                 return True
             else:
                 logging.info("(num_solutions: {}, m: {}, n: {}, k: {}) \n".format(self.num_genes,self.m,self.n,self.k))
-                print("num_solutions: {}, m: {}, n: {},k: {} \n".format(self.num_genes,self.m,self.n,self.k))
+                print("num_solutions: {}, m: {}, n: {},k: {}, scaled: {} \n".format(self.num_genes,self.m,self.n,self.k, str(self.scale)))
                 logging.info("best index: {}, caculated_fitness:{}, best_fitness: {}, sizeofPop: {}\n".format(\
                     self.bfi,self.individuals[self.bfi].fitness(False),self.best_fitness, len(self.individuals)))
                 print("bfi: ",self.bfi,"calculated_fitness: ",self.individuals[self.bfi].fitness(False),"best_fitness: ",self.best_fitness, "sizeofPop: ", len(self.individuals), "\n")
@@ -508,7 +515,7 @@ class Population():
         acc_gen = 0.3* self.m**2 *100
         for i in range(1,self.eons):
             self.c_count = i
-            print(i)
+            print(self.c_count)
             if found == False:
                 if self.just_initialized==False:
                     self.battle(kill_mode)
