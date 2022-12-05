@@ -1,4 +1,4 @@
-from os import kill
+import os
 import openpyxl,time, concurrent.futures as cf
 #from pop_w_replace import Population
 from Population import Population
@@ -86,10 +86,10 @@ def collect_data(m,n):
             world=run(i,n,k,"roulette", pop_size = i**2 * 50)
 
 
-def test(size,j,m,n,k,kill_mode="non_bias_random",mode="roulette",norm=True):
+def test(size,j,m,n,k,kill_mode="non_bias_random",mode="roulette",norm=True, scale=False):
     
     start_time = time.perf_counter()
-    world = Population(size,m,n,k,norm=norm)
+    world = Population(size,m,n,k,norm=norm, scale=scale)
     world.num_genes =j
     best = world.evolve(mode,kill_mode)
     end_time = time.perf_counter()
