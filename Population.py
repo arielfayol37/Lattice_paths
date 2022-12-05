@@ -76,10 +76,13 @@ class Population():
  
             
         for z  in range(int(0.1*self.size)):
+            take = [i for i in range(self.l)]
             #creating random people with random paths now
             new_genome = Genome(self.num_genes,self.m,self.n,self.k,True)
             for s in range(self.num_genes):
-                new_genome.sequences[s].terms = self.paths[random.randint(0,self.l-1)]
+                r = random.randint(0,len(take)-1)
+                new_genome.sequences[s].terms = self.paths[take[r]]
+                take.pop(r)
              
             self.individuals.append(new_genome)
             self.fitnesses.append(new_genome.fitness(False))
