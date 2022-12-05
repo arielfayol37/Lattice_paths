@@ -2,7 +2,7 @@
 import random
 from datetime import datetime
 random.seed(getattr(datetime.now(), "microsecond"))
-from path_gen import LexOrderer
+ 
         
 
 
@@ -47,14 +47,19 @@ class Sequence():
             #not a valid path but useful later in the code to generate "empty" sequences(sequences with no path yet)
             for i in range(m+n-1):
                 self.terms.append([0,0,0])
+        self.l = len(self.terms)
+    def __iter__(self):
+    # return an iterator for the list of terms
+        return iter(self.terms)            
     def show(self):
         for term in self.terms:
             print(term[0],term[1], term[2], sep=" ", end="   ")
     def compare(self,sequence,k):
-        assert len(self.terms) == len(sequence.terms)
+ 
+        assert self.l == sequence.l
         check= 0
-        for i in range(len(self.terms)):
-            if sequence.terms[i] == self.terms[i]:#can make tis better someow
+        for a,b in zip(self.terms, sequence.terms):
+            if a == b:#can make tis better someow
                 check += 1
                 if check == k:
                     break
@@ -63,40 +68,10 @@ class Sequence():
         else:
             return 1
     def same_paths(self,sequence):
-        for i in range(len(self.terms)):
-            if sequence.terms[i] != self.terms[i]:
+        assert self.l == sequence.l
+        for a,b in zip(self.terms, sequence.terms):
+            if a!=b:
                 return 0 #returns zero if paths are different
 
         return 1 #returns one if paths are the same
-
-def generate_all_paths(m,n):
-    paths = []
-    #you can use while loop to make sure all paths are created
-    max_len = int(combination(m+n,n))
-
-    """
-    while len(paths) < max_len:
-        l = Sequence(m,n)
-        if l.terms not in paths:
-            paths.append(l.terms)
-    """
-    l = LexOrderer(m,n)
-    w = l.__iter__()
-    for i in range(max_len):
-        
-        paths.append(translate(l.__next__(),"to_O"))
-
-
-    print(len(paths))
-    return paths
-       
-def factorial(n):
-    if n == 1:
-        return n
-    else:
-        return n * factorial(n-1)
-
-def combination(m:int,n:int)->int:
-    assert m>=n
-    return factorial(m)/(factorial(n)*factorial(m-n))
-    
+ 
