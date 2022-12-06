@@ -5,7 +5,7 @@ from Population import Population
 from Sequence import Sequence
 from lp_utils import generate_all_paths, sume
 
-def run(m,n,k,mode="roulette",old_world=0,pop_size=1000):
+def run(m,n,k,mode="roulette",old_world=None,pop_size=1000):
     filename = "lattice_table_g" + str(n) + '.xlsx'
     try:
         wb = openpyxl.load_workbook(filename)
