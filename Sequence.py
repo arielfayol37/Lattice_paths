@@ -2,52 +2,32 @@
 import random
 from datetime import datetime
 random.seed(getattr(datetime.now(), "microsecond"))
- 
+#from path_gen import LexOrderer
         
 
 
 class Sequence():
     #generate a sequence(object containing a path) depends on the values of m and n
-    def __init__(self, m, n, empty=False):
+    def __init__(self, m, n, paths=None, len_paths=None,index=None, empty=False):
         assert m >= n
-        r=random.randint(0,1)
-        self.terms = [[0,0,r]]
-        m_count = 0
-        n_count = 0
+        
+        
+        
         if not empty:
-            for i in range(m+n-1):
-                if r==1 and n_count<n:
-                    
-                    n_count += 1
-                    r2 = random.randint(0,1)
-                    self.terms.append([self.terms[i][0],self.terms[i][1]+1, r2])
-                    r= r2
-                elif r==0 and m_count<m:
-                    m_count +=1
-                    r2 = random.randint(0,1)
-                    self.terms.append([self.terms[i][0]+1,self.terms[i][1], r2])
-                    r= r2
-                elif r==1 and n_count==n:
-                    self.terms[i] = [self.terms[i][0],self.terms[i][1], 0]
-                    for j in range(i, m+n-1):
-                        
-                        self.terms.append([self.terms[j][0]+1,self.terms[j][1], 0])
-                    break
-                elif r==0 and m_count==m:
-                    self.terms[i] = [self.terms[i][0],self.terms[i][1], 1]
-                    for j in range(i, m+n-1):
-                        
-                        self.terms.append([self.terms[j][0],self.terms[j][1]+1, 1])
-                    break
-            if self.terms[-1][0] == m:
-                self.terms[-1][2] = 1
-            if self.terms[-1][1] == n:
-                self.terms[-1][2] = 0
+            if index==None:
+                self.pi=random.randint(0,len_paths-1)
+                
+            else:
+                self.pi = index
+            self.terms = paths[self.pi]       
+   
         else:
+            self.terms = []
             #not a valid path but useful later in the code to generate "empty" sequences(sequences with no path yet)
-            for i in range(m+n-1):
+            for i in range(m+n):
                 self.terms.append([0,0,0])
-        self.l = len(self.terms)
+               
+        self.l = m+n
     def __iter__(self):
     # return an iterator for the list of terms
         return iter(self.terms)            
