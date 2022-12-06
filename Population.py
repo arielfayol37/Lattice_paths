@@ -8,7 +8,7 @@ logging.disable(logging.CRITICAL)
 #from Sequence import generate_all_paths
 import os
 class Population():
-    def __init__(self,size, m, n, k,create_paths = True, norm = True, scale=True):
+    def __init__(self,size, m, n, k,create_paths = True, norm = True, scale=True, temp=4.0):
         assert m>0 and n>0 and m>=n 
         self.individuals = []
         self.children = []
@@ -31,6 +31,7 @@ class Population():
         self.just_initialized = False
         self.norm = norm
         self.scale = scale
+        self.temperature = temp
         if create_paths:
             
             self.paths = generate_all_paths(m,n)
@@ -67,9 +68,9 @@ class Population():
         
         for r in range(50):
             #creating individuals which will take paths from C
-            new_genome = Genome(self.num_genes,self.m,self.n,self.k, True)#Creating individual with no paths yet
+            new_genome = Genome(self.num_genes,self.m,self.n,self.k,self.paths,self.l,True)#Creating individual with no paths yet
             for s in range(self.num_genes):
-                new_genome.sequences[s].terms = self.paths[(self.l-self.ci)%self.l]
+                new_genome.sequences[s].terms,new_genome.sequences[s].pi = self.paths[(self.l-self.ci)%self.l],self.ci
                 self.ci+=1
             self.individuals.append(new_genome)
             self.fitnesses.append(new_genome.fitness(False))
@@ -78,11 +79,8 @@ class Population():
         for z  in range(int(0.1*self.size)):
             take = [i for i in range(self.l)]
             #creating random people with random paths now
-            new_genome = Genome(self.num_genes,self.m,self.n,self.k,True)
-            for s in range(self.num_genes):
-                r = random.randint(0,len(take)-1)
-                new_genome.sequences[s].terms = self.paths[take[r]]
-                take.pop(r)
+            new_genome = Genome(self.num_genes,self.m,self.n,self.k,self.paths,self.l)
+ 
              
             self.individuals.append(new_genome)
             self.fitnesses.append(new_genome.fitness(False))
@@ -129,7 +127,7 @@ class Population():
     def prescale(self):
         uav = self.av_pop_fitnesses[-1]
         delta = self.best_fitness - uav
-        fmultiple = 1.5 + (4.0-1.5)*self.c_count/self.eons 
+        fmultiple = 1.5 + (self.temperature-1.5)*self.c_count/self.eons 
         if self.min_fitness > (fmultiple*uav - self.best_fitness)/(fmultiple - 1.0):    
             
             self.sa = (fmultiple - 1.0) * uav/delta
@@ -381,8 +379,8 @@ class Population():
 
                 encoding_part_1 = random.randint(1,2) #first sequences of genes of child 1 come from parent 1
 
-                new_child_1 = Genome(self.num_genes,self.m,self.n,self.k,True) #create empty child
-                new_child_2 = Genome(self.num_genes, self.m,self.n,self.k,True)
+                new_child_1 = Genome(self.num_genes,self.m,self.n,self.k,self.paths,self.l,True) #create empty child
+                new_child_2 = Genome(self.num_genes, self.m,self.n,self.k,self.paths,self.l,True)
                 if encoding_part_1 == 1:#you can reduce this to two for loops ... indexin usin num_genes-s maybe
                     for s in range(int(self.num_genes * co_coef)):
                            
@@ -405,9 +403,9 @@ class Population():
                         new_child_1.sequences[s] = self.individuals[parent_2_index].sequences[s]
                         new_child_2.sequences[s] = self.individuals[parent_1_index].sequences[s]
                         
-                new_child_2 = new_child_2.mutate()
+                new_child_2 = new_child_2.mutate(self.paths)
                 if j%100==0:
-                    new_child_1 = new_child_1.nmutate()
+                    new_child_1 = new_child_1.nmutate(self.paths)
                 a = new_child_1.fitness(False)
                 b = new_child_2.fitness(False)
                 self.children.append(new_child_1)
