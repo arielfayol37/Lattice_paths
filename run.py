@@ -1,7 +1,7 @@
 import os
 import openpyxl,time, concurrent.futures as cf
-#from pop_w_replace import Population
 from Population import Population
+#from Population import Population
 from Sequence import Sequence
 from lp_utils import generate_all_paths, sume
 
@@ -86,7 +86,7 @@ def collect_data(m,n):
             world=run(i,n,k,"roulette", pop_size = i**2 * 50)
 
 
-def test(size,j,m,n,k,kill_mode="non_bias_random",mode="roulette",norm=True, scale=False):
+def test(size,j,m,n,k,kill_mode="non_bias_random",mode="roulette",norm=True, scale=False, draw=False, visualize=False):
     
     start_time = time.perf_counter()
     world = Population(size,m,n,k,norm=norm, scale=scale)
@@ -94,18 +94,20 @@ def test(size,j,m,n,k,kill_mode="non_bias_random",mode="roulette",norm=True, sca
     best = world.evolve(mode,kill_mode)
     end_time = time.perf_counter()
     print(f"It took {(end_time-start_time)/60} minutes to find this solution")
-    #best.draw()
-    world.visualize_evolution()
+    if draw:
+        best.draw()
+    if visualize:    
+        world.visualize_evolution()
     return
 def greedy(m,n,k,pats):
     sol = []
     pats.reverse()
-    l = Sequence(m,n,True)
+    l = Sequence(m,n,empty=True)
     l.terms = pats[0]
     sol.append(l)
     
     for pat in pats[1:]:
-        s = Sequence(m,n,True)
+        s = Sequence(m,n,empty=True)
         s.terms = pat
         for i in range(len(sol)):
             if s.compare(sol[i],k)==0:
@@ -199,21 +201,6 @@ def compare_kill_mode():
         f2 =executor.submit(nbrr,non_bias_random_times)
         kr = f1.result()
         nr = f2.result()
-
-
-    """
-    p1 = mp.Process(target=nbrr, args = [non_bias_random_times])
-    p2 = mp.Process(target=kbr, args = [kill_bottom_times])
-    p1.start()
-    p2.start()
-
-    
-    p1.join()
-    p2.join()
-    """
-
-    #print("Kill_bottom_times:", kr)
-    #print("non_bias_random_times:", nr)
     print("kr av: ", sume(kr)/len(kr))
     print("nr av: ", sume(nr)/len(nr))
     
