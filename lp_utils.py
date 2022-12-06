@@ -18,7 +18,7 @@ def translate(patA,to_lan):
                  
                 num_0 += 1
         assert num_0 >= num_1        
-        patO = Sequence(num_0, num_1)
+        patO = Sequence(num_0, num_1,empty=True)
         for i in range(len(patO.terms)):
             if i!= len(patA)-1:
                 if patA[i] == 0 or patA[i] == "E" or patA[i] == "D":
