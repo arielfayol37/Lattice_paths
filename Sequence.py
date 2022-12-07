@@ -1,8 +1,10 @@
-""" Genetic program for Maths Research:finding K distinct paths for an m by n lattice, m>=n """
+
+#This is Sequence.py
+#python3 Sequence.py
 import random
 from datetime import datetime
 random.seed(getattr(datetime.now(), "microsecond"))
-#from path_gen import LexOrderer
+ 
         
 
 
@@ -14,7 +16,7 @@ class Sequence():
         
         
         if not empty:
-            if index==None:
+            if index is None:
                 self.pi=random.randint(0,len_paths-1)
                 
             else:
@@ -44,9 +46,9 @@ class Sequence():
                 if check == k:
                     break
         if check >= k:
-            return 0
+            return 0 #k-equivalent
         else:
-            return 1
+            return 1 #k-distinct
     def same_paths(self,sequence):
         assert self.l == sequence.l
         for a,b in zip(self.terms, sequence.terms):
