@@ -1,4 +1,5 @@
 #This is lp_utils.py
+#python3 lp_utils.py
 from decimal import *
 from Sequence import Sequence
 import random 
@@ -48,20 +49,16 @@ def softmax(x):
     soft = []
     for i in x:
         soft.append(Decimal(2.718)**Decimal(i))
-    sumo = sume(soft)
+    sumo = sum(soft)
     for i in range(len(soft)):
         soft[i]/=sumo
     return soft
 def normalize(x):
     
-    sumo=sume(x)
+    sumo=sum(x)
  
     return [i/sumo for i in x]          
-def sume(x):
-    sume = 0
-    for i in x:
-        sume+=i
-    return sume
+ 
 def dot_product(va,vb,a , b):
     vc = []
     try:
