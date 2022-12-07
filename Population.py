@@ -1,3 +1,12 @@
+#This is Population.py
+#python3 Population.py
+
+""" Genetic program for Maths Research:finding k-distinct paths for an m by n lattice, m>=n 
+    All the paths share the same length and are the shortest when leaving from the topmost left corner of the lattice to the bottommost right corner of the lattice.
+    All the edges are of length one unit. As such, each path is of length m+n units.
+    Two paths are said to be k-distinct if they share at most k-1 edges.
+    So the aim of this program is to find the maximum number of k-distinct paths, given an m by n lattice and a parameter k
+"""
 from lp_utils import *
 from Genome import Genome
 from Sequence import Sequence
@@ -114,7 +123,7 @@ class Population():
      
          
         assert len(self.fitnesses)==len(self.individuals), "line 108: difference in len of fitnesses and individuals"
-        av = sume(self.fitnesses)/len(self.fitnesses)
+        av = sum(self.fitnesses)/len(self.fitnesses)
         try:
             if av==self.av_pop_fitnesses[-30]:
                 self.norm = False
@@ -123,7 +132,7 @@ class Population():
         self.av_pop_fitnesses.append(av) 
         self.max_fitnesses.append(self.best_fitness)
 
-
+    #continuation of Population class
     def prescale(self):
         uav = self.av_pop_fitnesses[-1]
         delta = self.best_fitness - uav
@@ -291,7 +300,7 @@ class Population():
 
 
 
-
+    #continuation of Population class
     def parent_pick(self, mode = "roulette"):
         #assert len(self.fitnesses) == len(self.individuals)
         
@@ -302,7 +311,7 @@ class Population():
                 
                 self.indexes = [v for v in range(len(self.individuals))]
  
-                assert sume(self.p_mating) != 1
+                assert sum(self.p_mating) != 1
                 self.p_mating = []
                 if self.scale:
                     self.scale_fitnesses()
@@ -366,7 +375,7 @@ class Population():
 
 
 
-
+    #continuation of Population class
     def mating(self, mode = "random_random"):
         logging.info("mating")
         mating_coef = 0.7
