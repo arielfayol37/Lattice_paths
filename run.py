@@ -1,9 +1,10 @@
+#python3 run.py
 import os
 import openpyxl,time, concurrent.futures as cf
 from Population import Population
 #from Population import Population
 from Sequence import Sequence
-from lp_utils import generate_all_paths, sume
+from lp_utils import generate_all_paths
 
 def run(m,n,k,mode="roulette",old_world=None,pop_size=1000):
     filename = "lattice_table_g" + str(n) + '.xlsx'
@@ -99,9 +100,32 @@ def test(size,j,m,n,k,kill_mode="non_bias_random",mode="roulette",norm=True, sca
     if visualize:    
         world.visualize_evolution()
     return
+
+def grab(m,n,k):
+    filename = "lattice_table_gen_" + str(n) + ".xlsx"
+    try:
+        wb = openpyxl.load_workbook(filename)
+    except:
+        wb = openpyxl.Workbook()
+    return wb["sheet"].cell(m+1,k+1)    
+
+
+def srun():
+    list_kwargs = [] #fill this using a function to grab excel values
+    futures = []
+
+    with cf.ProcessPoolExecutor as executor:
+        for i in len(list_kwargs):
+            futures.append(executor.submit(target=test, **list_kwargs[i]))
+        while True:
+            for f in cf.as_completed(futures):
+                if f.done():
+                    for fu in futures:
+                        fu.cancel()
+
 def greedy(m,n,k,pats):
     sol = []
-    pats.reverse()
+    #pats.reverse()
     l = Sequence(m,n,empty=True)
     l.terms = pats[0]
     sol.append(l)
@@ -114,8 +138,7 @@ def greedy(m,n,k,pats):
                 break
             if i == len(sol)-1:
                 sol.append(s)
-    #sol_num = [i for i in range(len(sol))]            
-    #return sol
+    
     return len(sol)
 def greedy_test(m,n,k,paths,recurse=False):
     solutions = []
@@ -127,13 +150,35 @@ def greedy_test(m,n,k,paths,recurse=False):
         if recurse:
             patos2 = patos.copy()
             
-            #patos.reverse()
+             
             solutions+=greedy_test(m,n,k,patos2,False)
-            #patos.reverse()
+           
         assert len(patos) == len(paths)-1
         
         solutions.append(greedy(m,n,k,patos))
     return solutions
+def greedy_t(m,n,k,paths):
+    solutions = []
+    pati = paths.copy()
+    max_indexes = (0,0)
+    max = greedy(m,n,k,pati)
+    solutions.append(max)
+    for i in range(len(paths)):
+        patos = paths.copy()
+        patos.pop(i)
+        for j in range(len(patos)):
+            patz = patos.copy()
+            patz.pop(j)
+            amax = greedy(m,n,k,patz)
+            if amax>max:
+                max = amax
+                max_indexes = (i,j)
+            solutions.append(max)
+        
+        assert len(patos) == len(paths)-1
+        solutions.append(greedy(m,n,k,patos))
+    return (solutions,max_indexes)
+
 def find_max(alist):
     maxs = alist[0]
     for item in alist:
@@ -141,7 +186,7 @@ def find_max(alist):
             maxs = item
     return maxs
 def collect_data_greedy(m,n):
-    filename = "lattice_table_greedy_double_slicing" + str(n) + '.xlsx'
+    filename = "lattice_table_greedy_double_slicing_loo" + str(n) + '.xlsx'
     try:
         wb = openpyxl.load_workbook(filename)
     except:
@@ -151,17 +196,20 @@ def collect_data_greedy(m,n):
 
     for i in range(m,12):
         paths = generate_all_paths(i,n)
-        #w = []
-        for k in range(1,i+n):
+         
+        for k in range(3,i+n-1):
             sheet.cell(1,k+1).value =str(k)
             sheet.cell(i+1,1).value= str(i)
-            f = greedy_test(i,n,k,paths,recurse=True)
-            
-            #for z in f:
-                #w.append(len(z))
+            sheet.cell(1+15,2*k+1).value =str(k)
+            sheet.cell(i+1+15,1).value= str(i)
+            f, max_indexes = greedy_t(i,n,k,paths)
+           
             maxi = find_max(f)
             sheet.cell(i+1,k+1).value=maxi
-            #w = []
+            sheet.cell(i+1+15,2*k+1).value=max_indexes[0]
+            sheet.cell(i+1+15,2*k+2).value=max_indexes[1]
+
+             
             wb.save(filename)
 
 def nbrr(non_bias_random_times):
@@ -172,22 +220,20 @@ def nbrr(non_bias_random_times):
         test(700,15,6,3,5,kill_mode="non_bias_random")
         end_time = time.perf_counter()
         non_bias_random_times.append((end_time-start_time)/60)
-         
-        #non_bias_random_times.append(10-i)
-        #print('Sindy')
+     
     return non_bias_random_times  
        
 def kbr(kill_bottom_times):
     
     for i in range(10):
-        #kill_bottom_times.append(i)
+         
          
         start_time = time.perf_counter()
         test(700,15,6,3,5,kill_mode = "kill_bottom")
         end_time = time.perf_counter()
         kill_bottom_times.append((end_time-start_time)/60)
              
-        #print("Ariel")
+         
     return kill_bottom_times 
  
     
@@ -201,7 +247,7 @@ def compare_kill_mode():
         f2 =executor.submit(nbrr,non_bias_random_times)
         kr = f1.result()
         nr = f2.result()
-    print("kr av: ", sume(kr)/len(kr))
-    print("nr av: ", sume(nr)/len(nr))
+    print("kr av: ", sum(kr)/len(kr))
+    print("nr av: ", sum(nr)/len(nr))
     
  
