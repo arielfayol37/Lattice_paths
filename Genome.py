@@ -1,6 +1,6 @@
 #This is Genome.py
 #python3 Genome.py
-from Sequence import Sequence
+#from Sequence import Sequence
 from lp_utils import translate
 import random
 from drawing_paths import draw_path, draw_lattice
@@ -15,42 +15,45 @@ class Genome():
         self.k = k
         self.num_sequences = num_sequences
         self.sequences = [] # Initialize the list of sequences in the genome.
-         
+        self.take_paths = [i for i in range(len_paths)] 
         #self.poison()
         self._generate_sequences(paths, len_paths, empty)
 
 
     def _generate_sequences(self, paths, len_paths, empty):
         # Generate a list of indices for the available paths.
-        self.take_paths = [i for i in range(len_paths)]
+        
         
         # Generate the sequences in the genome based on the value of the empty parameter.
         if not empty:
             for i in range(self.num_sequences):
                 # Choose a random index from the list of available paths.
-                r = random.randint(0, len(self.take_paths) - 1)
-                
+                r = random.randint(0, len_paths - i - 1)
+                """
                 # Create a new sequence using the chosen path.
                 new_seq = Sequence(self.m, self.n, paths=paths, index=self.take_paths[r])
-                
+                """
                 # Add the new sequence to the genome, and remove the chosen path from the list of available paths.
-                self.sequences.append(new_seq)
+                self.sequences.append(self.take_paths[r])
                 self.take_paths.pop(r)
         else:
     # If the empty parameter is True, generate empty sequences.
             for i in range(self.num_sequences):
-                new_seq = Sequence(self.m, self.n, empty=True)
-                self.sequences.append(new_seq)
+                #new_seq = Sequence(self.m, self.n, empty=True)
+                self.sequences.append(-1)
 
                  
 
-    def fitness(self, penalty_indexes=True):
+    def fitness(self, dict_equivalences, penalty_indexes=True):
         # Calculate the fitness of the genome.
         penalty = 0
-        penalty_index = []
+        
+        distinct =0
 
         if penalty_indexes:
+            penalty_index = []
             # If the penalty_indexes parameter is True, calculate the penalty and the penalty index.
+            """
             for i in range(len(self.sequences)):
                 for j in range(i + 1, len(self.sequences)):
                     # Check if the sequences at the given indices are k-equivalent.
@@ -60,30 +63,40 @@ class Genome():
                     if xo == 0:
                         penalty += 1
                         penalty_index.append([i, j])
-
+                    else:
+                        distinct+=1
+                          
+            """
+            for i in range(self.num_sequences):
+                for j in range(i + 1, self.num_sequences):
+                    if self.sequences[j] in dict_equivalences[str(self.sequences[i])]:#k-equivalent
+                        penalty+=1
+                        penalty_index.append([i,j])
+                    else:
+                        distinct +=1    
             if penalty == 0:
                 # If the penalty is 0, return a large value and the empty penalty index.
-                return (9999, penalty_index)
+               return (9999, penalty_index)
 
             # Return the inverse of the penalty and the penalty index.
-            return (1 / penalty, penalty_index)
+            return (distinct, penalty_index)
         else:
+             
             # If the penalty_indexes parameter is False, only calculate the penalty.
-            for i in range(len(self.sequences)):
-                for j in range(i + 1, len(self.sequences)):
-                    # Check if the sequences at the given indices are k-equivalent.
-                    xo = self.sequences[i].compare(self.sequences[j], self.k)
-                    
-                    # If the sequences are k-equivalent, increment the penalty.
-                    if xo == 0:
-                        penalty += 1
-            
+            for i in range(self.num_sequences):
+                for j in range(i + 1, self.num_sequences):
+                    if self.sequences[j] in dict_equivalences[str(self.sequences[i])]:
+                        penalty+=1
+                         
+                    else:
+                        distinct +=1    
+             
             if penalty == 0:
                 # If the penalty is 0, return a large value.
                 return 9999
             
             # Return the inverse of the penalty.
-            return 1 / penalty
+            return distinct
 
     def divert(self, other):
         # Calculate the divergence between the genome and another genome.
@@ -107,16 +120,22 @@ class Genome():
         # Return the ratio of sequences that are different.
         return count / len_seq
 
-    def show(self):
+    def show(self, paths):
         # Print the sequences in the genome to the console.
+        """ 
         for sequence in self.sequences:
             sequence.show()
             print("\n")
-    def mutate(self, paths):
+        """
+        for seq in self.sequences:
+            for term in paths[seq]:
+                print(term[0],term[1], term[2], sep=" ", end="   ")
+            print("\n")                 
+    def mutate(self, dict_equivalences):
         # Mutate the genome by replacing one of its sequences with a new sequence.
 
         # Calculate the penalty index.
-        index_eq = self.fitness()[-1]
+        index_eq = self.fitness(dict_equivalences)[-1]
 
         # Choose a random index from the list of available paths.
         i = random.randint(0, len(self.take_paths) - 1)
@@ -126,29 +145,30 @@ class Genome():
             r = index_eq[random.randint(0, len(index_eq) - 1)][random.randint(0, 1)]
             
             # Replace the sequence at the chosen index with a new sequence using the chosen path.
-            self.take_paths.append(self.sequences[r].pi)
-            self.sequences[r] = Sequence(self.m, self.n, paths=paths, index=self.take_paths[i])
+            self.take_paths.append(self.sequences[r])
+            #self.sequences[r] = Sequence(self.m, self.n, paths=paths, index=self.take_paths[i])
+            self.sequences[r] = self.take_paths[i]
             self.take_paths.pop(i)
 
         # Return the genome.
-        return self
+        return  
 
         return self
-    def nmutate(self, paths):
+    def nmutate(self, dict_equivalences):
     # Mutate the genome by replacing multiple sequences with new sequences.
     
     # Calculate the penalty index.
-        index_eq = len(self.fitness()[-1])
+        index_eq = len(self.fitness(dict_equivalences)[-1])
  
         if index_eq:
              
             r = random.randint(0,self.num_sequences-1)
-            
+            i= random.randint(0, len(self.take_paths)-1)
              
-            self.take_paths.append(self.sequences[r].pi)
-            self.sequences[r] = Sequence(self.m, self.n, paths=paths, len_paths=len(paths))
-            self.take_paths.pop(self.sequences[r].pi) 
-        return self
+            self.take_paths.append(self.sequences[r])
+            self.sequences[r] = self.take_paths[i] #does the order matter? no, since the last path index was appended at the end of self.take_paths
+            self.take_paths.pop(i) 
+        return 
 
     def translate(self):
         translated = []
