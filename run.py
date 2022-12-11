@@ -87,11 +87,11 @@ def collect_data(m,n):
             world=run(i,n,k,"roulette", pop_size = i**2 * 50)
 
 
-def test(size,j,m,n,k,kill_mode="non_bias_random",mode="roulette",norm=True, scale=False, draw=False, visualize=False):
+def test(size,j,m,n,k,kill_mode="non_bias_random",mode="roulette",norm=True, scale=True, draw=False, visualize=False):
     
     start_time = time.perf_counter()
-    world = Population(size,m,n,k,norm=norm, scale=scale)
-    world.num_genes =j
+    world = Population(size,j,m,n,k,norm=norm, scale=scale)
+     
     best = world.evolve(mode,kill_mode)
     end_time = time.perf_counter()
     print(f"It took {(end_time-start_time)/60} minutes to find this solution")
@@ -99,7 +99,7 @@ def test(size,j,m,n,k,kill_mode="non_bias_random",mode="roulette",norm=True, sca
         best.draw()
     if visualize:    
         world.visualize_evolution()
-    return
+    return best
 
 def grab(m,n,k):
     filename = "lattice_table_gen_" + str(n) + ".xlsx"
@@ -125,7 +125,7 @@ def srun():
 
 def greedy(m,n,k,pats):
     sol = []
-    #pats.reverse()
+    pats.reverse()
     l = Sequence(m,n,empty=True)
     l.terms = pats[0]
     sol.append(l)
@@ -160,11 +160,11 @@ def greedy_test(m,n,k,paths,recurse=False):
 def greedy_t(m,n,k,paths):
     solutions = []
     pati = paths.copy()
-    max_indexes = (0,0)
+    max_indexes = (-2,-2)
     max = greedy(m,n,k,pati)
     solutions.append(max)
     for i in range(len(paths)):
-        patos = paths.copy()
+        patos = paths.copy()#paths, not pati because pati has been reversed inside greedy()
         patos.pop(i)
         for j in range(len(patos)):
             patz = patos.copy()
@@ -172,11 +172,18 @@ def greedy_t(m,n,k,paths):
             amax = greedy(m,n,k,patz)
             if amax>max:
                 max = amax
-                max_indexes = (i,j)
+                if j>=i:
+                    max_indexes = (i,j+1)
+                else:
+                    max_indexes = (i,j)    
             solutions.append(max)
         
         assert len(patos) == len(paths)-1
-        solutions.append(greedy(m,n,k,patos))
+        pmax = greedy(m,n,k,patos)
+        if pmax > max:
+            max=pmax
+            max_indexes = (i,-1)
+        solutions.append(pmax)
     return (solutions,max_indexes)
 
 def find_max(alist):
@@ -186,7 +193,7 @@ def find_max(alist):
             maxs = item
     return maxs
 def collect_data_greedy(m,n):
-    filename = "lattice_table_greedy_double_slicing_loo" + str(n) + '.xlsx'
+    filename = "lattice_table_greedy_double_slicing_rloo" + str(n) + '.xlsx'
     try:
         wb = openpyxl.load_workbook(filename)
     except:
