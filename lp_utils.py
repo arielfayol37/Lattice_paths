@@ -1,7 +1,7 @@
 #This is lp_utils.py
 #python3 lp_utils.py
 from decimal import *
-from Sequence import Sequence
+#from Sequence import Sequence
 import random 
  
 
@@ -19,22 +19,22 @@ def translate(patA,to_lan):
                  
                 num_0 += 1
         assert num_0 >= num_1        
-        patO = Sequence(num_0, num_1,empty=True)
-        for i in range(len(patO.terms)):
+        patO = [[0,0,0] for i in range(num_0+num_1)]
+        for i in range(len(patO)):
             if i!= len(patA)-1:
                 if patA[i] == 0 or patA[i] == "E" or patA[i] == "D":
-                    patO.terms[i][2] = 0
-                    patO.terms[i+1][0] = patO.terms[i][0] + 1
-                    patO.terms[i+1][1] = patO.terms[i][1]
+                    patO[i][2] = 0
+                    patO[i+1][0] = patO[i][0] + 1
+                    patO[i+1][1] = patO[i][1]
                 else:
-                    patO.terms[i][2] = 1
-                    patO.terms[i+1][0] = patO.terms[i][0]
-                    patO.terms[i+1][1] = patO.terms[i][1] +1
+                    patO[i][2] = 1
+                    patO[i+1][0] = patO[i][0]
+                    patO[i+1][1] = patO[i][1] +1
             else:
                 if patA[i] == 0 or patA[i] == "E" or patA[i] == "D":
-                    patO.terms[i][2] = 0
+                    patO[i][2] = 0
                 else:
-                    patO.terms[i][2] = 1
+                    patO[i][2] = 1
                     
         return patO
     elif to_lan == "to_A":
@@ -66,7 +66,9 @@ def dot_product(va,vb,a , b):
     except:
         raise Exception("different list sizes: size(va) = ", len(va), "size(vb) = ", len(vb))
     for i in range(len(va)):
+         
         vc.append(va[i]*a + vb[i]*b)
+     
     return vc
 def bubble_sort(pivot,b):
     assert len(pivot)==len(b)
@@ -123,7 +125,7 @@ def generate_all_paths(m,n):
     generate_paths(0,0,"", m,n, paths)
     for p in paths:
         real_paths.append(translate(p,"to_O"))
-    
+    assert max_len == len(real_paths)    
     return real_paths
        
 def factorial(n):
