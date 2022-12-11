@@ -9,7 +9,7 @@
 """
 from lp_utils import *
 from Genome import Genome
-from Sequence import Sequence
+#from Sequence import Sequence
 import logging
 logging.basicConfig(filename='myProgramLog.txt', level=logging.DEBUG,\
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -17,7 +17,7 @@ logging.disable(logging.CRITICAL)
 #from Sequence import generate_all_paths
 import os
 class Population():
-    def __init__(self,size, m, n, k,create_paths = True, norm = True, scale=True, temp=4.0):
+    def __init__(self,size,j, m, n, k,create_paths = True, norm = True, scale=True, temp=4.0):
         assert m>0 and n>0 and m>=n 
         self.individuals = []
         self.children = []
@@ -31,7 +31,7 @@ class Population():
         #self.c_divergences = []
         self.p_mating = [] 
         self.indexes = []
-        self.num_genes = 1
+        self.num_genes = j
         self.sorted = False
         self.max_size = int(size/2)
         self.roulette_ready = False
@@ -54,16 +54,36 @@ class Population():
         self.scaled_fitnesses = []
         self.sa, self.sb = (0,0)
         self.min_fitness =0
-        self.c_count = 0 
+        self.c_count = 0
+        self.equivalences = dict()
+        self.compute_equivalences()
+        self.distribution = dict()
+         
 
 
 
 
 
 
-
-
-
+    def compute_equivalences(self):
+        self.equivalences.clear()
+        for i in range(self.l):
+            foo = self.equivalences.setdefault(str(i), set([i]))
+             
+            
+        for i in range(self.l):
+            for j in range(i+1,self.l):
+                equi = 0
+                for a,b in zip(self.paths[i], self.paths[j]):
+                    if a == b:#can make tis better someow
+                        equi += 1
+                        #if k-equivalent
+                        if equi == self.k:
+                            self.equivalences[str(i)].add(j)  
+                            self.equivalences[str(j)].add(i) 
+                            break
+                       
+         
 
 
 
@@ -79,20 +99,26 @@ class Population():
             #creating individuals which will take paths from C
             new_genome = Genome(self.num_genes,self.m,self.n,self.k,self.paths,self.l,True)#Creating individual with no paths yet
             for s in range(self.num_genes):
-                new_genome.sequences[s].terms,new_genome.sequences[s].pi = self.paths[(self.l-self.ci)%self.l],self.ci
+                i =  self.ci%self.l 
+                new_genome.sequences[s]  = i
+                new_genome.take_paths.remove(i) 
+
                 self.ci+=1
             self.individuals.append(new_genome)
-            self.fitnesses.append(new_genome.fitness(False))
- 
+            self.fitnesses.append(new_genome.fitness(self.equivalences,False))
+        if self.c_count ==1:
+            new_indi_coef = 0.1
+        else:    
+            new_indi_coef = 1
             
-        for z  in range(int(0.1*self.size)):
-            take = [i for i in range(self.l)]
+        for z  in range(int(new_indi_coef*self.size)):
+             
             #creating random people with random paths now
             new_genome = Genome(self.num_genes,self.m,self.n,self.k,self.paths,self.l)
  
              
             self.individuals.append(new_genome)
-            self.fitnesses.append(new_genome.fitness(False))
+            self.fitnesses.append(new_genome.fitness(self.equivalences,False))
  
         return False
 
@@ -108,6 +134,18 @@ class Population():
 
     def cal_div(self, sort = True):
         self.find_best()
+        self.distribution.clear()
+        self.divergences.clear()
+        for i in range(self.l):
+            self.distribution.setdefault(str(i), 0)
+        for indi in self.individuals:
+            for pi in indi.sequences:
+                self.distribution[str(pi)]+=1
+        pop_size = len(self.individuals)
+        denominator = pop_size*self.num_genes
+        for indi in self.individuals:
+            self.divergences.append(1-(sum([self.distribution[str(i)] for i in indi.sequences]))/denominator)
+        """ 
         self.divergences=[]
         
         if sort:
@@ -119,7 +157,7 @@ class Population():
             sumsee+=ss
             self.divergences.append(ss)
         self.av_pop_divergences.append(sumsee/len(self.divergences))
-
+        """
      
          
         assert len(self.fitnesses)==len(self.individuals), "line 108: difference in len of fitnesses and individuals"
@@ -131,7 +169,7 @@ class Population():
             pass
         self.av_pop_fitnesses.append(av) 
         self.max_fitnesses.append(self.best_fitness)
-
+        
     #continuation of Population class
     def prescale(self):
         uav = self.av_pop_fitnesses[-1]
@@ -156,7 +194,7 @@ class Population():
     
     def scale_fitnesses(self):
         self.prescale()
-        self.scaled_fitnesses =[]
+        self.scaled_fitnesses.clear()
         for f in self.fitnesses:
             self.scaled_fitnesses.append(self.sa*f + self.sb) 
 
@@ -196,9 +234,9 @@ class Population():
             #self.individuals = quick_sort(self.individuals)
             
             l = len(self.individuals)
-            self.fitnesses = []
+            self.fitnesses.clear()
             for i in range(l):
-                self.fitnesses.append(self.individuals[i].fitness(False))
+                self.fitnesses.append(self.individuals[i].fitness(self.equivalences,False))
                    
             for i in range(l):
                 swapped = False
@@ -312,12 +350,15 @@ class Population():
                 self.indexes = [v for v in range(len(self.individuals))]
  
                 assert sum(self.p_mating) != 1
-                self.p_mating = []
+                self.p_mating.clear()
                 if self.scale:
                     self.scale_fitnesses()
-                    df_scores = dot_product(self.scaled_fitnesses, self.divergences, 0.8, 0.2)
+
+                    df_scores = dot_product(self.scaled_fitnesses, self.divergences, 0.5,self.fm*0.5)
+                    #df_scores = self.scaled_fitnesses        
                 else:
-                    df_scores = dot_product(self.fitnesses, self.divergences, 0.5, 0.5)
+                    #pass
+                    df_scores = dot_product(self.fitnesses, self.divergences, 0.5,self.fm* 0.5)
                 if self.norm:
                     self.p_mating = normalize(df_scores)
                 else:
@@ -392,31 +433,102 @@ class Population():
                 new_child_2 = Genome(self.num_genes, self.m,self.n,self.k,self.paths,self.l,True)
                 if encoding_part_1 == 1:#you can reduce this to two for loops ... indexin usin num_genes-s maybe
                     for s in range(int(self.num_genes * co_coef)):
-                           
-                        new_child_1.sequences[s] = self.individuals[parent_1_index].sequences[s]
-                        new_child_2.sequences[s] = self.individuals[parent_2_index].sequences[s]
-                        
+                        i = self.individuals[parent_1_index].sequences[s]
+                        j = self.individuals[parent_2_index].sequences[s]
+                         
+                         
+                        try:
+                            new_child_1.take_paths.remove(i)
+                            new_child_1.sequences[s] = i
+                            
+                        except ValueError:
+                            r = random.randint(0,len(new_child_1.take_paths)-1) 
+                            new_child_1.sequences[s] = new_child_1.take_paths[r]
+                            new_child_1.take_paths.pop(r)
+                         
+                        try:
+                            new_child_2.take_paths.remove(j)
+                            new_child_2.sequences[s] =j 
+                             
+                        except ValueError:
+                            r = random.randint(0,len(new_child_2.take_paths)-1) 
+                            new_child_2.sequences[s] = new_child_2.take_paths[r]
+                            new_child_2.take_paths.pop(r)
+                             
+                         
                     for s in range(int(self.num_genes*co_coef), self.num_genes):
-                        
-                        new_child_1.sequences[s] = self.individuals[parent_2_index].sequences[s]
-                        new_child_2.sequences[s] = self.individuals[parent_1_index].sequences[s]
-                        
+                        i = self.individuals[parent_2_index].sequences[s]
+                        j = self.individuals[parent_1_index].sequences[s]  
+                        new_child_1.sequences[s] = i
+                        new_child_2.sequences[s] = j
+                        try:
+                            new_child_1.take_paths.remove(i)
+                            new_child_1.sequences[s] = i
+                            
+                        except ValueError:
+                            r = random.randint(0,len(new_child_1.take_paths)-1) 
+                            new_child_1.sequences[s] = new_child_1.take_paths[r]
+                            new_child_1.take_paths.pop(r)
+                         
+                        try:
+                            new_child_2.take_paths.remove(j)
+                            new_child_2.sequences[s] =j 
+                             
+                        except ValueError:
+                            r = random.randint(0,len(new_child_2.take_paths)-1) 
+                            new_child_2.sequences[s] = new_child_2.take_paths[r]
+                            new_child_2.take_paths.pop(r)
+                             
                 else:
                     for s in range(int(self.num_genes*co_coef), self.num_genes):
                            
-                        new_child_1.sequences[s] = self.individuals[parent_1_index].sequences[s]
-                        new_child_2.sequences[s] = self.individuals[parent_2_index].sequences[s]
-                        
+                        i = self.individuals[parent_1_index].sequences[s]
+                        j = self.individuals[parent_2_index].sequences[s]   
+                        try:
+                            new_child_1.take_paths.remove(i)
+                            new_child_1.sequences[s] = i
+                            
+                        except ValueError:
+                            r = random.randint(0,len(new_child_1.take_paths)-1) 
+                            new_child_1.sequences[s] = new_child_1.take_paths[r]
+                            new_child_1.take_paths.pop(r)
+                         
+                        try:
+                            new_child_2.take_paths.remove(j)
+                            new_child_2.sequences[s] =j 
+                             
+                        except ValueError:
+                            r = random.randint(0,len(new_child_2.take_paths)-1) 
+                            new_child_2.sequences[s] = new_child_2.take_paths[r]
+                            new_child_2.take_paths.pop(r)
+                             
                     for s in range(int(self.num_genes * co_coef)):
 
-                        new_child_1.sequences[s] = self.individuals[parent_2_index].sequences[s]
-                        new_child_2.sequences[s] = self.individuals[parent_1_index].sequences[s]
-                        
-                new_child_2 = new_child_2.mutate(self.paths)
+                        i = self.individuals[parent_2_index].sequences[s]
+                        j = self.individuals[parent_1_index].sequences[s]  
+                        try:
+                            new_child_1.take_paths.remove(i)
+                            new_child_1.sequences[s] = i
+                            
+                        except ValueError:
+                            r = random.randint(0,len(new_child_1.take_paths)-1) 
+                            new_child_1.sequences[s] = new_child_1.take_paths[r]
+                            new_child_1.take_paths.pop(r)
+                         
+                        try:
+                            new_child_2.take_paths.remove(j)
+                            new_child_2.sequences[s] =j 
+                             
+                        except ValueError :
+                            r = random.randint(0,len(new_child_2.take_paths)-1) 
+                            new_child_2.sequences[s] = new_child_2.take_paths[r]
+                            new_child_2.take_paths.pop(r)
+                             
+                new_child_2.mutate(self.equivalences)
                 if j%100==0:
-                    new_child_1 = new_child_1.nmutate(self.paths)
-                a = new_child_1.fitness(False)
-                b = new_child_2.fitness(False)
+                    new_child_1.nmutate(self.equivalences)
+                a = new_child_1.fitness(self.equivalences,False)
+                b = new_child_2.fitness(self.equivalences,False)
                 self.children.append(new_child_1)
                 self.children.append(new_child_2)
                 self.c_fitnesses.append(a)#you don't need tis , you can actually append directly to te oriinal lists
@@ -425,11 +537,11 @@ class Population():
 
         self.individuals+=self.children
         self.sorted = False
-        self.children = []
+        self.children.clear()
         self.fitnesses+=self.c_fitnesses
-        self.c_fitnesses = []
+        self.c_fitnesses.clear()
          
-        self.r_fitnesses = []
+         
          
         self.roulette_ready = False
         
@@ -472,7 +584,7 @@ class Population():
                 print(fitness)
             if self.individuals[0].fitness()[0] == 9999:
                 print(len(self.individuals))
-                self.individuals[0].show()    
+                self.individuals[0].show(self.paths)    
                 return True
             else:
                 return False
@@ -482,21 +594,22 @@ class Population():
                 #assert len(self.fitnesses) == len(self.individuals)
                 for s in range(len(self.individuals)):
                     try:
-                        assert self.individuals[s].fitness(False) == self.fitnesses[s]
+                        assert self.individuals[s].fitness(self.equivalences,False) == self.fitnesses[s]
                     except:
-                        print("real: ",self.individuals[s].fitness(False),"calculated: ",self.fitnesses[s], "index: ", s)    
+                        print("real: ",self.individuals[s].fitness(self.equivalences,False),"calculated: ",self.fitnesses[s], "index: ", s)    
                         raise Exception("Difference between real fitness and calculated fitness")
             
             if self.best_fitness == 9999:
-                assert self.individuals[self.bfi].fitness(False) == 9999
-                self.individuals[self.bfi].show()
+                assert self.individuals[self.bfi].fitness(self.equivalences, False) == 9999
+                self.individuals[self.bfi].show(self.paths)
                 return True
             else:
                 logging.info("(num_solutions: {}, m: {}, n: {}, k: {}) \n".format(self.num_genes,self.m,self.n,self.k))
                 print("num_solutions: {}, m: {}, n: {},k: {}, scaled: {} \n".format(self.num_genes,self.m,self.n,self.k, str(self.scale)))
-                logging.info("best index: {}, caculated_fitness:{}, best_fitness: {}, sizeofPop: {}\n".format(\
-                    self.bfi,self.individuals[self.bfi].fitness(False),self.best_fitness, len(self.individuals)))
-                print("bfi: ",self.bfi,"calculated_fitness: ",self.individuals[self.bfi].fitness(False),"best_fitness: ",self.best_fitness, "sizeofPop: ", len(self.individuals), "\n")
+                logging.info("best index: {}, caculated_fitness:{}/{}, best_fitness: {}/{}, sizeofPop: {}\n".format(\
+                    self.bfi,self.individuals[self.bfi].fitness(self.equivalences,False),self.fm, self.best_fitness, self.fm, len(self.individuals)))
+                print("bfi: ",self.bfi,"calculated_fitness: ",self.individuals[self.bfi].fitness(self.equivalences, False),"/", self.fm,"best_fitness: "\
+                    ,self.best_fitness,"/", self.fm, "sizeofPop: ", len(self.individuals), "\n")
                 #assert self.individuals[self.bfi].fitness()[0] == self.best_fitness
                 return False    
                 #divergences not updated at this point
@@ -520,8 +633,8 @@ class Population():
 
 
     def evolve(self,mode,kill_mode="non_bias_random"):
-        found = self.initialize()
-        
+        found = self.initialize() 
+        self.fm = int(self.num_genes*(self.num_genes-1)/2)
         acc_gen = 0.3* self.m**2 *100
         for i in range(1,self.eons):
             self.c_count = i
@@ -530,12 +643,12 @@ class Population():
                 if self.just_initialized==False:
                     self.battle(kill_mode)
                     self.mating(mode)
-                    found = self.check("speedy",test=False)
+                    found = self.check("speedy",test=True)
 
                 else:
                     self.mating("random_random")
                     #self.mating("roulette") 
-                    found = self.check("speedy",test=False)
+                    found = self.check("speedy",test=True)
 
             else:
                 
@@ -545,7 +658,7 @@ class Population():
                 print("size of population", len(self.individuals), "best fitness", self.best_fitness)
                 return self.individuals[self.bfi]
                  
-            if (i)%10 == 0:
+            if (i)%50 == 0:
                 found = self.initialize()
                 self.sorted = False
                 self.roulette_ready = False
