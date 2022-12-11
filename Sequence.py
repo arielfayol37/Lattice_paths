@@ -30,30 +30,36 @@ class Sequence():
                 self.terms.append([0,0,0])
                
         self.l = m+n
+    """   
     def __iter__(self):
     # return an iterator for the list of terms
-        return iter(self.terms)            
+        return iter(self.terms)
+    """                 
     def show(self):
         for term in self.terms:
             print(term[0],term[1], term[2], sep=" ", end="   ")
     def compare(self,sequence,k):
  
         assert self.l == sequence.l
-        check= 0
+        equi= 0
+         
         for a,b in zip(self.terms, sequence.terms):
             if a == b:#can make tis better someow
-                check += 1
-                if check == k:
+                equi += 1
+             
+                if equi == k:
                     break
-        if check >= k:
+        if equi >= k:
             return 0 #k-equivalent
         else:
             return 1 #k-distinct
     def same_paths(self,sequence):
         assert self.l == sequence.l
+        """
         for a,b in zip(self.terms, sequence.terms):
             if a!=b:
                 return 0 #returns zero if paths are different
-
-        return 1 #returns one if paths are the same
+        """
+         
+        return int(self.pi==sequence.pi) #returns one if paths are the same
  
