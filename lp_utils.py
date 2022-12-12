@@ -39,7 +39,7 @@ def translate(patA,to_lan):
         return patO
     elif to_lan == "to_A":
         patO = []
-        for term in patA.terms:
+        for term in patA:
             patO.append(term[2])
         return patO
 
