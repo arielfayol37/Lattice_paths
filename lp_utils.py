@@ -48,7 +48,8 @@ def translate(patA,to_lan):
 def softmax(x):
     soft = []
     for i in x:
-        soft.append(Decimal(2.718)**Decimal(i))
+        soft.append(Decimal(2.7)**Decimal(i))
+        #soft.append(2.7**i)
     sumo = sum(soft)
     for i in range(len(soft)):
         soft[i]/=sumo
