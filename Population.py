@@ -379,14 +379,16 @@ class Population():
                  
             rand1 = random.randint(0,len(self.pool)-1)#might raise an error if pool is empty
             parent_1_index = self.pool[rand1]
+            self.pool.pop(rand1)
             
             rand2 = random.randint(0,len(self.pool)-1)    
             parent_2_index = self.pool[rand2]
-            self.pool.remove(parent_1_index)#without replacement
-            try:#in case rand1 == rand2 and pool is empty 
-                self.pool.remove(parent_2_index)#without replacement
-            except:
-                pass
+            self.pool.pop(rand2)
+            #without replacement
+            #try:in case rand1 == rand2 and pool is empty 
+                #without replacement
+            #except:
+                #pass
             
   
             return (parent_1_index, parent_2_index)
@@ -435,8 +437,23 @@ class Population():
                     for s in range(int(self.num_genes * co_coef)):
                         i = self.individuals[parent_1_index].sequences[s]
                         j = self.individuals[parent_2_index].sequences[s]
-                         
-                         
+                        if i not in new_child_1.sequences:
+                            new_child_1.take_paths.remove(i)
+                            new_child_1.sequences[s] = i
+                        else:
+                            r = random.randint(0,len(new_child_1.take_paths)-1) 
+                            new_child_1.sequences[s] = new_child_1.take_paths[r]
+                            new_child_1.take_paths.pop(r)
+
+                        if j not in new_child_2.sequences:
+                            new_child_2.take_paths.remove(j)
+                            new_child_2.sequences[s] =j 
+                        else:
+                            r = random.randint(0,len(new_child_2.take_paths)-1) 
+                            new_child_2.sequences[s] = new_child_2.take_paths[r]
+                            new_child_2.take_paths.pop(r)  
+                           
+                        """
                         try:
                             new_child_1.take_paths.remove(i)
                             new_child_1.sequences[s] = i
@@ -454,13 +471,28 @@ class Population():
                             r = random.randint(0,len(new_child_2.take_paths)-1) 
                             new_child_2.sequences[s] = new_child_2.take_paths[r]
                             new_child_2.take_paths.pop(r)
-                             
+                        """      
                          
                     for s in range(int(self.num_genes*co_coef), self.num_genes):
                         i = self.individuals[parent_2_index].sequences[s]
-                        j = self.individuals[parent_1_index].sequences[s]  
-                        new_child_1.sequences[s] = i
-                        new_child_2.sequences[s] = j
+                        j = self.individuals[parent_1_index].sequences[s]
+
+                        if i not in new_child_1.sequences:
+                            new_child_1.take_paths.remove(i)
+                            new_child_1.sequences[s] = i
+                        else:
+                            r = random.randint(0,len(new_child_1.take_paths)-1) 
+                            new_child_1.sequences[s] = new_child_1.take_paths[r]
+                            new_child_1.take_paths.pop(r)
+
+                        if j not in new_child_2.sequences:
+                            new_child_2.take_paths.remove(j)
+                            new_child_2.sequences[s] =j 
+                        else:
+                            r = random.randint(0,len(new_child_2.take_paths)-1) 
+                            new_child_2.sequences[s] = new_child_2.take_paths[r]
+                            new_child_2.take_paths.pop(r)  
+                        """
                         try:
                             new_child_1.take_paths.remove(i)
                             new_child_1.sequences[s] = i
@@ -478,12 +510,28 @@ class Population():
                             r = random.randint(0,len(new_child_2.take_paths)-1) 
                             new_child_2.sequences[s] = new_child_2.take_paths[r]
                             new_child_2.take_paths.pop(r)
-                             
+                        """     
                 else:
                     for s in range(int(self.num_genes*co_coef), self.num_genes):
                            
                         i = self.individuals[parent_1_index].sequences[s]
-                        j = self.individuals[parent_2_index].sequences[s]   
+                        j = self.individuals[parent_2_index].sequences[s]
+                        if i not in new_child_1.sequences:
+                            new_child_1.take_paths.remove(i)
+                            new_child_1.sequences[s] = i
+                        else:
+                            r = random.randint(0,len(new_child_1.take_paths)-1) 
+                            new_child_1.sequences[s] = new_child_1.take_paths[r]
+                            new_child_1.take_paths.pop(r)
+
+                        if j not in new_child_2.sequences:
+                            new_child_2.take_paths.remove(j)
+                            new_child_2.sequences[s] =j 
+                        else:
+                            r = random.randint(0,len(new_child_2.take_paths)-1) 
+                            new_child_2.sequences[s] = new_child_2.take_paths[r]
+                            new_child_2.take_paths.pop(r)
+                        """       
                         try:
                             new_child_1.take_paths.remove(i)
                             new_child_1.sequences[s] = i
@@ -501,11 +549,28 @@ class Population():
                             r = random.randint(0,len(new_child_2.take_paths)-1) 
                             new_child_2.sequences[s] = new_child_2.take_paths[r]
                             new_child_2.take_paths.pop(r)
-                             
+                        """     
                     for s in range(int(self.num_genes * co_coef)):
 
                         i = self.individuals[parent_2_index].sequences[s]
-                        j = self.individuals[parent_1_index].sequences[s]  
+                        j = self.individuals[parent_1_index].sequences[s]
+                        if i not in new_child_1.sequences:
+                            new_child_1.take_paths.remove(i)
+                            new_child_1.sequences[s] = i
+                        else:
+                            r = random.randint(0,len(new_child_1.take_paths)-1) 
+                            new_child_1.sequences[s] = new_child_1.take_paths[r]
+                            new_child_1.take_paths.pop(r)
+
+                        if j not in new_child_2.sequences:
+                            new_child_2.take_paths.remove(j)
+                            new_child_2.sequences[s] =j 
+                        else:
+                            r = random.randint(0,len(new_child_2.take_paths)-1) 
+                            new_child_2.sequences[s] = new_child_2.take_paths[r]
+                            new_child_2.take_paths.pop(r)
+
+                        """
                         try:
                             new_child_1.take_paths.remove(i)
                             new_child_1.sequences[s] = i
@@ -523,7 +588,7 @@ class Population():
                             r = random.randint(0,len(new_child_2.take_paths)-1) 
                             new_child_2.sequences[s] = new_child_2.take_paths[r]
                             new_child_2.take_paths.pop(r)
-                             
+                        """     
                 new_child_2.mutate(self.equivalences)
                 if j%100==0:
                     new_child_1.nmutate(self.equivalences)
@@ -604,11 +669,12 @@ class Population():
                 self.individuals[self.bfi].show(self.paths)
                 return True
             else:
+                assert self.individuals[self.bfi].fitness(self.equivalences, False) == self.best_fitness
                 logging.info("(num_solutions: {}, m: {}, n: {}, k: {}) \n".format(self.num_genes,self.m,self.n,self.k))
-                print("num_solutions: {}, m: {}, n: {},k: {}, scaled: {} \n".format(self.num_genes,self.m,self.n,self.k, str(self.scale)))
-                logging.info("best index: {}, caculated_fitness:{}/{}, best_fitness: {}/{}, sizeofPop: {}\n".format(\
-                    self.bfi,self.individuals[self.bfi].fitness(self.equivalences,False),self.fm, self.best_fitness, self.fm, len(self.individuals)))
-                print("bfi: ",self.bfi,"calculated_fitness: ",self.individuals[self.bfi].fitness(self.equivalences, False),"/", self.fm,"best_fitness: "\
+                print("num_solutions: {}, m: {}, n: {},k: {}, scaled: {}, softmax: {} \n".format(self.num_genes,self.m,self.n,self.k, str(self.scale), str(not self.norm)))
+                logging.info("best index: {} , best_fitness: {}/{}, sizeofPop: {}\n".format(\
+                    self.bfi,  self.best_fitness, self.fm, len(self.individuals)))
+                print("bfi: ",self.bfi, "best_fitness: "\
                     ,self.best_fitness,"/", self.fm, "sizeofPop: ", len(self.individuals), "\n")
                 #assert self.individuals[self.bfi].fitness()[0] == self.best_fitness
                 return False    
@@ -635,7 +701,7 @@ class Population():
     def evolve(self,mode,kill_mode="non_bias_random"):
         found = self.initialize() 
         self.fm = int(self.num_genes*(self.num_genes-1)/2)
-        acc_gen = 0.3* self.m**2 *100
+        acc_gen = 0.5* self.m**2 *100
         for i in range(1,self.eons):
             self.c_count = i
             print(self.c_count)
@@ -643,12 +709,12 @@ class Population():
                 if self.just_initialized==False:
                     self.battle(kill_mode)
                     self.mating(mode)
-                    found = self.check("speedy",test=True)
+                    found = self.check("speedy",test=False)
 
                 else:
                     self.mating("random_random")
                     #self.mating("roulette") 
-                    found = self.check("speedy",test=True)
+                    found = self.check("speedy",test=False)
 
             else:
                 
@@ -663,7 +729,7 @@ class Population():
                 self.sorted = False
                 self.roulette_ready = False
                 self.norm = True
-            if i == int(self.eons - acc_gen):
+            if i >= int(self.eons - acc_gen):
                 self.norm = False
                 
  
