@@ -50,7 +50,7 @@ class Population():
         self.av_pop_fitnesses = []
         self.av_pop_divergences = []
         self.pool = []
-        self.eons = self.m**2 *400
+        self.eons = self.m**2 *1000
         self.scaled_fitnesses = []
         self.sa, self.sb = (0,0)
         self.min_fitness =0
