@@ -127,10 +127,11 @@ class Genome():
             sequence.show()
             print("\n")
         """
+        self.sequences.sort()
         for seq in self.sequences:
             for term in paths[seq]:
-                print(term[0],term[1], term[2], sep=" ", end="   ")
-            print("\n")                 
+                print(term[0],term[1], term[2],sep=" ", end="   ")
+            print(f"pi:{seq} \n")                 
     def mutate(self, dict_equivalences):
         # Mutate the genome by replacing one of its sequences with a new sequence.
 
