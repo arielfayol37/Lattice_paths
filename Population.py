@@ -50,14 +50,14 @@ class Population():
         self.av_pop_fitnesses = []
         self.av_pop_divergences = []
         self.pool = []
-        self.eons = self.m**2 *100
+        self.eons = self.m**2 *400
         self.scaled_fitnesses = []
         self.sa, self.sb = (0,0)
         self.min_fitness =0
         self.c_count = 0
         self.equivalences = dict()
         self.compute_equivalences()
-        self.distribution = dict()
+        self.distribution = dict() 
          
 
 
@@ -145,22 +145,14 @@ class Population():
         denominator = pop_size*self.num_genes
         for indi in self.individuals:
             self.divergences.append(1-(sum([self.distribution[str(i)] for i in indi.sequences]))/denominator)
-        """ 
-        self.divergences=[]
-        
-        if sort:
-            self.bsort()
-        sumsee=0    
-        for i in range(len(self.individuals)):
-             
-            ss= self.individuals[i].divert(self.individuals[self.bfi])
-            sumsee+=ss
-            self.divergences.append(ss)
-        self.av_pop_divergences.append(sumsee/len(self.divergences))
-        """
+         
+        assert len(self.divergences)==len(self.individuals)     
+        av_div= sum(self.divergences)/len(self.individuals)     
+        self.av_pop_divergences.append(av_div)
+         
      
          
-        assert len(self.fitnesses)==len(self.individuals), "line 108: difference in len of fitnesses and individuals"
+        assert len(self.fitnesses)==len(self.individuals), "line 155: difference in len of fitnesses and individuals"
         av = sum(self.fitnesses)/len(self.fitnesses)
         try:
             if av==self.av_pop_fitnesses[-30]:
@@ -701,7 +693,7 @@ class Population():
     def evolve(self,mode,kill_mode="non_bias_random"):
         found = self.initialize() 
         self.fm = int(self.num_genes*(self.num_genes-1)/2)
-        acc_gen = 0.5* self.m**2 *100
+        acc_gen = 0.5* self.eons
         for i in range(1,self.eons):
             self.c_count = i
             print(self.c_count)
