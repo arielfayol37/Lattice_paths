@@ -135,7 +135,7 @@ def factorial(n):
     else:
         return n * factorial(n-1)
 
-def combination(m:int,n:int)->int:
+def combination(m,n):
     assert m>=n
     return factorial(m)/(factorial(n)*factorial(m-n))
     
