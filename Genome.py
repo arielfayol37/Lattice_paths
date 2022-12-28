@@ -171,6 +171,23 @@ class Genome():
             self.take_paths.pop(i) 
         return 
 
+    def smutate(self, dict_equivalences,l):
+    # Mutate the genome by replacing multiple sequences with new sequences.
+    
+    # Calculate the penalty index.
+        index_eq = len(self.fitness(dict_equivalences)[-1])
+ 
+        if index_eq:
+             
+            r = random.randint(0,self.num_sequences-1)
+             
+             
+             
+            self.sequences[r] = random.randint(0,l-1)  
+             
+        return 
+
+
     def translate(self):
         translated = []
         for sequence in self.sequences:
