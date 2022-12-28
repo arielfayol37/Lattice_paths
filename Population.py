@@ -133,7 +133,7 @@ class Population():
 
 
     def cal_div(self, sort = True):
-        self.find_best()
+        #self.find_best()
         self.distribution.clear()
         self.divergences.clear()
         for i in range(self.l):
@@ -205,20 +205,20 @@ class Population():
 
 
     def bsort(self):
-        
+        """ 
         try:
             assert self.sorted == False
         except:
             raise Exception("Called bsort() when already sorted")
-        """    
+            
         try:
             assert len(self.individuals) == len(self.fitnesses)
         except:
-            print(len(self.fitnesses), len(self.individuals))
+            #print(len(self.fitnesses), len(self.individuals))
             raise Exception("fitnesses and individuals should have\
                 the same length")
             for i in range(len(self.individuals)):
-                print(self.fitnesses[i], self.individuals[i].fitness()[0], self.divergences[i])
+                #print(self.fitnesses[i], self.individuals[i].fitness()[0], self.divergences[i])
         """            
 
         if self.sorted==False:
@@ -425,10 +425,12 @@ class Population():
 
                 new_child_1 = Genome(self.num_genes,self.m,self.n,self.k,self.paths,self.l,True) #create empty child
                 new_child_2 = Genome(self.num_genes, self.m,self.n,self.k,self.paths,self.l,True)
+                new_child_3 = Genome(self.num_genes, self.m,self.n,self.k,self.paths,self.l,True)
                 if encoding_part_1 == 1:#you can reduce this to two for loops ... indexin usin num_genes-s maybe
                     for s in range(int(self.num_genes * co_coef)):
                         i = self.individuals[parent_1_index].sequences[s]
                         j = self.individuals[parent_2_index].sequences[s]
+                        new_child_3.sequences[s] = i
                         if i not in new_child_1.sequences:
                             new_child_1.take_paths.remove(i)
                             new_child_1.sequences[s] = i
@@ -468,7 +470,7 @@ class Population():
                     for s in range(int(self.num_genes*co_coef), self.num_genes):
                         i = self.individuals[parent_2_index].sequences[s]
                         j = self.individuals[parent_1_index].sequences[s]
-
+                        new_child_3.sequences[s] = i
                         if i not in new_child_1.sequences:
                             new_child_1.take_paths.remove(i)
                             new_child_1.sequences[s] = i
@@ -508,6 +510,7 @@ class Population():
                            
                         i = self.individuals[parent_1_index].sequences[s]
                         j = self.individuals[parent_2_index].sequences[s]
+                        new_child_3.sequences[s] = i
                         if i not in new_child_1.sequences:
                             new_child_1.take_paths.remove(i)
                             new_child_1.sequences[s] = i
@@ -543,7 +546,7 @@ class Population():
                             new_child_2.take_paths.pop(r)
                         """     
                     for s in range(int(self.num_genes * co_coef)):
-
+                        new_child_3.sequences[s] = i    
                         i = self.individuals[parent_2_index].sequences[s]
                         j = self.individuals[parent_1_index].sequences[s]
                         if i not in new_child_1.sequences:
@@ -584,12 +587,16 @@ class Population():
                 new_child_2.mutate(self.equivalences)
                 if j%100==0:
                     new_child_1.nmutate(self.equivalences)
+                    new_child_3.smutate(self.equivalences,self.l)
                 a = new_child_1.fitness(self.equivalences,False)
                 b = new_child_2.fitness(self.equivalences,False)
+                c = new_child_3.fitness(self.equivalences,False)
                 self.children.append(new_child_1)
                 self.children.append(new_child_2)
+                self.children.append(new_child_3)
                 self.c_fitnesses.append(a)#you don't need tis , you can actually append directly to te oriinal lists
                 self.c_fitnesses.append(b)
+                self.c_fitnesses.append(c)
  
 
         self.individuals+=self.children
@@ -638,10 +645,10 @@ class Population():
             
             self.bsort()
             for fitness in self.fitnesses[:10]:
-                print(fitness)
-            if self.individuals[0].fitness()[0] == 9999:
-                print(len(self.individuals))
-                self.individuals[0].show(self.paths)    
+                ##print(fitness)
+            #if self.individuals[0].fitness()[0] == 9999:
+                ##print(len(self.individuals))
+                #self.individuals[0].show(self.paths)    
                 return True
             else:
                 return False
@@ -653,7 +660,7 @@ class Population():
                     try:
                         assert self.individuals[s].fitness(self.equivalences,False) == self.fitnesses[s]
                     except:
-                        print("real: ",self.individuals[s].fitness(self.equivalences,False),"calculated: ",self.fitnesses[s], "index: ", s)    
+                        #print("real: ",self.individuals[s].fitness(self.equivalences,False),"calculated: ",self.fitnesses[s], "index: ", s)    
                         raise Exception("Difference between real fitness and calculated fitness")
             
             if self.best_fitness == 9999:
@@ -663,11 +670,11 @@ class Population():
             else:
                 assert self.individuals[self.bfi].fitness(self.equivalences, False) == self.best_fitness
                 logging.info("(num_solutions: {}, m: {}, n: {}, k: {}) \n".format(self.num_genes,self.m,self.n,self.k))
-                print("num_solutions: {}, m: {}, n: {},k: {}, scaled: {}, softmax: {} \n".format(self.num_genes,self.m,self.n,self.k, str(self.scale), str(not self.norm)))
+                #print("num_solutions: {}, m: {}, n: {},k: {}, scaled: {}, softmax: {} \n".format(self.num_genes,self.m,self.n,self.k, str(self.scale), str(not self.norm)))
                 logging.info("best index: {} , best_fitness: {}/{}, sizeofPop: {}\n".format(\
                     self.bfi,  self.best_fitness, self.fm, len(self.individuals)))
-                print("bfi: ",self.bfi, "best_fitness: "\
-                    ,self.best_fitness,"/", self.fm, "sizeofPop: ", len(self.individuals), "\n")
+                #print("bfi: ",self.bfi, "best_fitness: "\
+                    #,self.best_fitness,"/", self.fm, "sizeofPop: ", len(self.individuals), "\n")
                 #assert self.individuals[self.bfi].fitness()[0] == self.best_fitness
                 return False    
                 #divergences not updated at this point
@@ -696,7 +703,7 @@ class Population():
         acc_gen = 0.5* self.eons
         for i in range(1,self.eons):
             self.c_count = i
-            print(self.c_count)
+            #print(self.c_count)
             if found == False:
                 if self.just_initialized==False:
                     self.battle(kill_mode)
@@ -711,9 +718,9 @@ class Population():
             else:
                 
                 
-                print("self.bfi = ", self.bfi)
-                print("solutions = {},m = {}, n = {}, k = {}".format(self.num_genes,self.m,self.n, self.k))
-                print("size of population", len(self.individuals), "best fitness", self.best_fitness)
+                #print("self.bfi = ", self.bfi)
+                #print("solutions = {},m = {}, n = {}, k = {}".format(self.num_genes,self.m,self.n, self.k))
+                #print("size of population", len(self.individuals), "best fitness", self.best_fitness)
                 return self.individuals[self.bfi]
                  
             if (i)%50 == 0:
@@ -725,9 +732,9 @@ class Population():
                 self.norm = False
                 
  
-        print("solutions = {},m = {}, n = {}, k = {}".format(self.num_genes,self.m,self.n, self.k))        
-        print("size of sub-population", len(self.individuals), "best fitness", self.best_fitness)
-        print("bfi, size of pop",self.bfi, len(self.individuals))
+        #print("solutions = {},m = {}, n = {}, k = {}".format(self.num_genes,self.m,self.n, self.k))        
+        #print("size of sub-population", len(self.individuals), "best fitness", self.best_fitness)
+        #print("bfi, size of pop",self.bfi, len(self.individuals))
         return self.individuals[self.bfi]
 
 
