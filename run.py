@@ -148,13 +148,13 @@ def parallel_search(target,m,n,k):
         # Wait for the tasks to complete
         run = True
         #result = Population(1,1,1,1,1)
-        foo = "population_"+str(m)+"_"+str(n)+"_"+str(k)
+        population = "population_"+str(m)+"_"+str(n)+"_"+str(k)
         while run:
             for i in range(len(tasks)):
                 if tasks[i].done():
                     
                     result = tasks[i].result()
-                    shelfFile[foo]= result
+                    shelfFile[population] = result
                     if result.fitnesses[result.bfi] == 9999:
                         
                         run = False
@@ -163,30 +163,31 @@ def parallel_search(target,m,n,k):
     
                             c=other_task.cancel()
                              
-                        break
+                           break
+            
             time.sleep(target*10)
              
             if tasks[-1].done():
-                if True:
-                    if shelfFile[foo].fitnesses[shelfFile[foo].bfi]!=9999:
-                        #merge all populations
-                        new_pop =tasks[0].result()
-                        for task in tasks[1:]:
-                            new_pop.individuals.append(task.result().individuals)
-                            new_pop.max_size = 7000
-                            new_pop.av_pop_fitnesses.clear()
-                            new_pop.av_pop_divergences.clear()
-                        new_best = new_pop.evolve(mode="roulette",kill_mode = "non_bias_random")    
-                        run = False
+                
+                if shelfFile[population].fitnesses[shelfFile[population].bfi]!=9999:
+                    #merge all populations
+                    new_pop =tasks[0].result()
+                    for task in tasks[1:]:
+                        new_pop.individuals.append(task.result().individuals)
+                        new_pop.max_size = 7000
+                        new_pop.av_pop_fitnesses.clear()
+                        new_pop.av_pop_divergences.clear()
+                    new_best = new_pop.evolve(mode="roulette",kill_mode = "non_bias_random")    
+                    
+                    result = new_pop
+                    shelfFile[foo]= result
+                    """
+                    if new_pop.fitnesses[new_pop.bfi]==9999:
+
                         result = new_pop
-                        shelfFile[foo]= result
-                        """
-                        if new_pop.fitnesses[new_pop.bfi]==9999:
-        
-                            result = new_pop
-                        """    
-                        
-    result = shelfFile[foo]                  
+                    """    
+                run = False
+    result = shelfFile[population]                  
     result.individuals[result.bfi].show(result.paths)
     f = result.fitnesses[result.bfi]
     print("BestFitness:", f, "Config_index: ", config_index)    
