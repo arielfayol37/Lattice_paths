@@ -97,7 +97,7 @@ def collect_data_genetic(m,n):
                 target = wb2["Sheet"].cell(i+1,k+1).value + 1  
              
             run, ci = parallel_search(target=target,m=i,n=n,k=k)
-            
+            wb.save(filename)
             while run:
                 config_indexes.append(ci)
                 target +=1
