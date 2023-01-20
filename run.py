@@ -390,4 +390,10 @@ if __name__ =="__main__":
     for i in [3,4,5]:
         #collect_data_greedy(i,i)
         collect_data_genetic(i,i)
+core 1 : collect_data_genetic(3,3)
+core 2: collect_data_genetic(4,3)
+.
+.
+.
+core n(11): collect_data_genetic(11, 3)
 """
