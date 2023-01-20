@@ -78,8 +78,8 @@ def run(m,n,k,mode="roulette",old_world=None,pop_size=1000):
 """
 
 def collect_data_genetic(m,n):
-    wb1 = openpyxl.load_workbook("lt_ds_rloo_" + str(n)+".xlsx")
-    wb2 = openpyxl.load_workbook("lt_ds_loo_" + str(n)+".xlsx")
+    wb1 = openpyxl.load_workbook("lattice_table_greedy_double_slicing_rloo" + str(n)+".xlsx")
+    wb2 = openpyxl.load_workbook("lattice_table_greedy_double_slicing_loo" + str(n)+".xlsx")
     filename = "lattice_table_genetic_" + str(n) + '.xlsx'
     config_indexes = []
     shelfFile = shelve.open("evolution_config")
