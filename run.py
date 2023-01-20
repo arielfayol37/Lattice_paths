@@ -92,9 +92,9 @@ def collect_data_genetic(m,n):
          
         for k in range(3,i+n-1):
             if wb1["Sheet"].cell(i+1,k+1).value > wb2["Sheet"].cell(i+1,k+1).value:
-                target = wb1["Sheet"].cell(i+1,k+1).value
+                target = wb1["Sheet"].cell(i+1,k+1).value + 1
             else:
-                target = wb2["Sheet"].cell(i+1,k+1).value   
+                target = wb2["Sheet"].cell(i+1,k+1).value + 1  
              
             run, ci = parallel_search(target=target,m=i,n=n,k=k)
             
@@ -388,6 +388,6 @@ def test(size,j,m,n,k,kill_mode="non_bias_random",mode="roulette",norm=True, sca
 if __name__ =="__main__":
      
     for i in [3,4,5]:
-        collect_data_greedy(i,i)
+        #collect_data_greedy(i,i)
         collect_data_genetic(i,i)
 """
