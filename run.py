@@ -102,8 +102,8 @@ def collect_data_genetic(m,n):
                 config_indexes.append(ci)
                 target +=1
                 run, ci = parallel_search(target=target,m=i,n=n,k=k)
-                
-            wb["Sheet"].cell(i+1,k+1).value = target-1
+            if int(wb["Sheet"].cell(i+1,k+1).value) < target-1:    
+                wb["Sheet"].cell(i+1,k+1).value = target-1
             wb.save(filename)
             shelfFile['list_of_configs'] = config_indexes    
     wb.close()
