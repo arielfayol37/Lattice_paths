@@ -7,75 +7,7 @@ from Sequence import Sequence
 from lp_utils import generate_all_paths
 from pebble import ProcessPool
 
-"""
-#you do not need to translate the run function, so you can skip this and o directly to collect_data 
-def run(m,n,k,mode="roulette",old_world=None,pop_size=1000):
-    filename = "lattice_table_g" + str(n) + '.xlsx'
-    try:
-        wb = openpyxl.load_workbook(filename)
-    except:
-        wb = openpyxl.Workbook()
-    sheet = wb['Sheet']
-    sheet.cell(1,1).value ="m/k"
-    sheet.cell(1,k+1).value =str(k)
-    sheet.cell(m+1,1).value= str(m)
-     
  
-    continuei = True
-    if k>=n:
-        j = n+1
-    world.num_genes =j
-    try:#try because cell might be empty
-        if sheet.cell(m+1, k+1).value < j-1:
-        
-            sheet.cell(m+1, k+1).value = j-1
-    except:
-        sheet.cell(m+1, k+1).value = j-1
-        
-    wb.save(filename)
- 
-       
-    while continuei:
-        print("LET'SSSS GGOOOO")
-        
-        best = world.evolve(mode)
-        #best.draw()
-        if best.fitness()[-1]:
-            continuei =False
-        else:
-             #Do not be lazy
-            world.bsort()
-            try:
-                assert best.fitness()[0] == world.fitnesses[0]
-            except:
-                raise Exception("best individual not at index zero after sorting, line 52")
-                
-            new_world = Population(pop_size,m,n,k,create_paths=False)
-            new_world.paths = world.paths
-            new_world.l = world.l
-            new_world.num_genes = j + 1
-            j+=1
-            if j-1 == len(new_world.paths):
-                continuei = False
-                
-            try:
-                if sheet.cell(m+1, k+1).value < j-1:
-        
-                    sheet.cell(m+1, k+1).value = j-1
-            except:
-                sheet.cell(m+1, k+1).value = j-1
-            wb.save(filename)
-            if continuei == False:
-                break
-              #don't be lazy man. let it restart to avoid early convergence
-            for i in range(0,int(0.1 * len(world.individuals))):
-                world.individuals[i].sequences.append(Sequence(m,n))
-                new_world.individuals.append(world.individuals[i])
-             
-            world = new_world
-    wb.close()
-    return world
-"""
 
 def collect_data_genetic(m,n):
     wb1 = openpyxl.load_workbook("lattice_table_greedy_double_slicing_rloo" + str(n)+".xlsx")
@@ -123,8 +55,10 @@ def search(size,j,m,n,k,kill_mode="non_bias_random",mode="roulette",norm=True, s
     if visualize:    
         world.visualize_evolution()
     return world
+
+
 def parallel_search(target,m,n,k):
-    # Set the parameter values for the function
+    # Set the parameter values for the search function
     
     evolution_parameters = [
          {'size': 1000, 'j': target, 'm': m, 'n': n, 'k': k, 'kill_mode': "non_bias_random",'temp':5},
@@ -134,7 +68,7 @@ def parallel_search(target,m,n,k):
          
     ]
      
-    shelfFile = shelve.open("genetic_data")
+    shelfFile = shelve.open("populations_genetic_data")
     config_index = -1
     # Create a ProcessPoolExecutor object to run the function in parallel
     #with cf.ProcessPoolExecutor() as executor:
@@ -147,14 +81,14 @@ def parallel_search(target,m,n,k):
 
         # Wait for the tasks to complete
         run = True
-        #result = Population(1,1,1,1,1)
+        
         population = "population_"+str(m)+"_"+str(n)+"_"+str(k)
         while run:
             for i in range(len(tasks)):
                 if tasks[i].done():
                     
                     result = tasks[i].result()
-                    shelfFile[population] = result
+                    shelfFile[population]= result
                     if result.fitnesses[result.bfi] == 9999:
                         
                         run = False
@@ -163,13 +97,12 @@ def parallel_search(target,m,n,k):
     
                             c=other_task.cancel()
                              
-                           break
-            
+                        break
             time.sleep(target*10)
              
             if tasks[-1].done():
-                
-                if shelfFile[population].fitnesses[shelfFile[population].bfi]!=9999:
+                 
+                if result.fitnesses[result.bfi]!=9999:
                     #merge all populations
                     new_pop =tasks[0].result()
                     for task in tasks[1:]:
@@ -177,17 +110,12 @@ def parallel_search(target,m,n,k):
                         new_pop.max_size = 7000
                         new_pop.av_pop_fitnesses.clear()
                         new_pop.av_pop_divergences.clear()
-                    new_best = new_pop.evolve(mode="roulette",kill_mode = "non_bias_random")    
-                    
+                    new_best_individual = new_pop.evolve(mode="roulette",kill_mode = "non_bias_random")    
+                    run = False
                     result = new_pop
-                    shelfFile[foo]= result
-                    """
-                    if new_pop.fitnesses[new_pop.bfi]==9999:
-
-                        result = new_pop
-                    """    
-                run = False
-    result = shelfFile[population]                  
+                    shelfFile[population]= result
+                        
+                     
     result.individuals[result.bfi].show(result.paths)
     f = result.fitnesses[result.bfi]
     print("BestFitness:", f, "Config_index: ", config_index)    
@@ -196,6 +124,7 @@ def parallel_search(target,m,n,k):
         return (True,config_index)
     else:
         return (False,config_index)    
+ 
  
 
 def greedy(m,n,k,pats, reverse=True):
