@@ -10,8 +10,8 @@ from pebble import ProcessPool
  
 
 def collect_data_genetic(m,n):
-    wb1 = openpyxl.load_workbook("lattice_table_greedy_double_slicing_rloo" + str(n)+".xlsx")
-    wb2 = openpyxl.load_workbook("lattice_table_greedy_double_slicing_loo" + str(n)+".xlsx")
+    wb1 = openpyxl.load_workbook("lt_ds_rloo_" + str(n)+".xlsx")
+    wb2 = openpyxl.load_workbook("lt_ds_loo_" + str(n)+".xlsx")
     filename = "lattice_table_genetic_" + str(n) + '.xlsx'
     config_indexes = []
     shelfFile = shelve.open("evolution_config")
@@ -24,18 +24,27 @@ def collect_data_genetic(m,n):
          
         for k in range(3,i+n-1):
             if wb1["Sheet"].cell(i+1,k+1).value > wb2["Sheet"].cell(i+1,k+1).value:
-                target = wb1["Sheet"].cell(i+1,k+1).value + 1
+                target = wb1["Sheet"].cell(i+1,k+1).value
             else:
-                target = wb2["Sheet"].cell(i+1,k+1).value + 1  
-             
+                target = wb2["Sheet"].cell(i+1,k+1).value 
+            print("Starting parallel search...") 
             run, ci = parallel_search(target=target,m=i,n=n,k=k)
+            print(f"Done parallel search for m = {i}, n = {n}, and k = {k}")
+            try:
+                if int(wb["Sheet"].cell(i+1,k+1).value) < target:    
+                    wb["Sheet"].cell(i+1,k+1).value = target
+            except:
+                wb["Sheet"].cell(i+1,k+1).value = target    
             wb.save(filename)
             while run:
                 config_indexes.append(ci)
                 target +=1
                 run, ci = parallel_search(target=target,m=i,n=n,k=k)
-            if int(wb["Sheet"].cell(i+1,k+1).value) < target-1:    
-                wb["Sheet"].cell(i+1,k+1).value = target-1
+            try:
+                if int(wb["Sheet"].cell(i+1,k+1).value) < target:    
+                    wb["Sheet"].cell(i+1,k+1).value = target
+            except:
+                wb["Sheet"].cell(i+1,k+1).value = target    
             wb.save(filename)
             shelfFile['list_of_configs'] = config_indexes    
     wb.close()
@@ -62,9 +71,9 @@ def parallel_search(target,m,n,k):
     
     evolution_parameters = [
          {'size': 1000, 'j': target, 'm': m, 'n': n, 'k': k, 'kill_mode': "non_bias_random",'temp':5},
-        {'size': 600, 'j': target, 'm': m, 'n': n, 'k': k, 'kill_mode': "non_bias_random",'temp':10},
-        {'size': 5000, 'j': target, 'm': m, 'n': n, 'k': k, 'kill_mode': "non_bias_random",'temp':3},
-        {'size': 20000, 'j': target, 'm': m, 'n': n, 'k': k, 'kill_mode': "non_bias_random",'temp':4},
+        {'size': 2000, 'j': target, 'm': m, 'n': n, 'k': k, 'kill_mode': "non_bias_random",'temp':10}
+        #{'size': 5000, 'j': target, 'm': m, 'n': n, 'k': k, 'kill_mode': "non_bias_random",'temp':3},
+        #{'size': 20000, 'j': target, 'm': m, 'n': n, 'k': k, 'kill_mode': "non_bias_random",'temp':4},
          
     ]
      
@@ -72,6 +81,7 @@ def parallel_search(target,m,n,k):
     config_index = -1
     # Create a ProcessPoolExecutor object to run the function in parallel
     #with cf.ProcessPoolExecutor() as executor:
+    
     with ProcessPool() as executor:
         # Create a list of asynchronous tasks
         tasks = []
@@ -82,43 +92,56 @@ def parallel_search(target,m,n,k):
         # Wait for the tasks to complete
         run = True
         
-        population = "population_"+str(m)+"_"+str(n)+"_"+str(k)
+        population = "population_"+str(target)+"_"+str(m)+"_"+str(n)+"_"+str(k)
+        print('Entering while loop')
         while run:
+            
             for i in range(len(tasks)):
                 if tasks[i].done():
-                    
+                    print('One task done')
                     result = tasks[i].result()
                     shelfFile[population]= result
                     if result.fitnesses[result.bfi] == 9999:
-                        
+                        print('Perfect individual found')
                         run = False
                         config_index = i                        
-                        for other_task in tasks:
+                        for j in range(len(tasks)):
     
-                            c=other_task.cancel()
+                            c=tasks[j].cancel() #will return False if already completed, and will cancel and return True otherwise
+                            
                              
-                        break
+                        break #breaking out of for loop
             time.sleep(target*10)
-             
+        
             if tasks[-1].done():
-                 
-                if result.fitnesses[result.bfi]!=9999:
+                print('Last task done')
+                #task[-1].done() may return True, while result has not yet been assigned
+                try:
+                    print(type(result))#checking whether result has already been assigned
+                except:
+                    result = tasks[0].result()
+                if result.fitnesses[result.bfi]!=9999:#important because even if task[-1].done() returns True, it might return true just because it was cancelled
                     #merge all populations
-                    new_pop =tasks[0].result()
+                    print('Merging populations')
+                    new_pop =tasks[0].result()#the search() returns a Population
                     for task in tasks[1:]:
-                        new_pop.individuals.append(task.result().individuals)
-                        new_pop.max_size = 7000
+                        new_pop.individuals += task.result().individuals
+                        new_pop.fitnesses += task.result().fitnesses
+                        new_pop.max_size = 1000
                         new_pop.av_pop_fitnesses.clear()
                         new_pop.av_pop_divergences.clear()
-                    new_best_individual = new_pop.evolve(mode="roulette",kill_mode = "non_bias_random")    
+                        new_pop.roulette_ready = False
+                    print('Merged population evolving')    
+                    new_best_individual = new_pop.evolve(mode="roulette", kill_mode = "non_bias_random")    
                     run = False
                     result = new_pop
                     shelfFile[population]= result
                         
-                     
+    print('Done with all tasks')                 
     result.individuals[result.bfi].show(result.paths)
     f = result.fitnesses[result.bfi]
-    print("BestFitness:", f, "Config_index: ", config_index)    
+    
+    print("BestFitness:", f,'/',result.fm, " Config_index: ", config_index)    
     if f== 9999:
 
         return (True,config_index)
@@ -213,12 +236,12 @@ def find_max(alist):
             maxs = item
     return maxs
 def collect_data_greedy(m,n):
-    filename1 = "lattice_table_greedy_double_slicing_rloo" + str(n) + '.xlsx'
+    filename1 = "lt_ds_rloo_" + str(n) + '.xlsx'
     try:
         wb1 = openpyxl.load_workbook(filename1)
     except:
         wb1 = openpyxl.Workbook()
-    filename2 = "lattice_table_greedy_double_slicing_loo" + str(n) + '.xlsx'
+    filename2 = "lt_ds_loo_" + str(n) + '.xlsx'
     try:
         wb2 = openpyxl.load_workbook(filename2)
     except:
@@ -320,10 +343,11 @@ if __name__ =="__main__":
     for i in [3,4,5]:
         #collect_data_greedy(i,i)
         collect_data_genetic(i,i)
-core 1 : collect_data_genetic(3,3)
-core 2: collect_data_genetic(4,3)
+#We start at m = 6 because the brute force algorithm was already used to find values of m in the range [1,5]        
+core 1 : collect_data_genetic(6,3)
+core 2: collect_data_genetic(7,3)
 .
 .
 .
-core n(11): collect_data_genetic(11, 3)
+core n(11-6): collect_data_genetic(11, 3)
 """
