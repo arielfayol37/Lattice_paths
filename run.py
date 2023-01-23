@@ -10,8 +10,8 @@ from pebble import ProcessPool
  
 
 def collect_data_genetic(m,n):
-    wb1 = openpyxl.load_workbook("lt_ds_rloo_" + str(n)+".xlsx")
-    wb2 = openpyxl.load_workbook("lt_ds_loo_" + str(n)+".xlsx")
+    wb1 = openpyxl.load_workbook("lattice_table_greedy_double_slicing_rloo" + str(n)+".xlsx")
+    wb2 = openpyxl.load_workbook("lattice_table_greedy_double_slicing_loo" + str(n)+".xlsx")
     filename = "lattice_table_genetic_" + str(n) + '.xlsx'
     config_indexes = []
     shelfFile = shelve.open("evolution_config")
@@ -72,8 +72,8 @@ def parallel_search(target,m,n,k):
     evolution_parameters = [
          {'size': 1000, 'j': target, 'm': m, 'n': n, 'k': k, 'kill_mode': "non_bias_random",'temp':5},
         {'size': 2000, 'j': target, 'm': m, 'n': n, 'k': k, 'kill_mode': "non_bias_random",'temp':10}
-        #{'size': 5000, 'j': target, 'm': m, 'n': n, 'k': k, 'kill_mode': "non_bias_random",'temp':3},
-        #{'size': 20000, 'j': target, 'm': m, 'n': n, 'k': k, 'kill_mode': "non_bias_random",'temp':4},
+        {'size': 5000, 'j': target, 'm': m, 'n': n, 'k': k, 'kill_mode': "non_bias_random",'temp':3},
+        {'size': 10000, 'j': target, 'm': m, 'n': n, 'k': k, 'kill_mode': "non_bias_random",'temp':4}
          
     ]
      
@@ -127,7 +127,7 @@ def parallel_search(target,m,n,k):
                     for task in tasks[1:]:
                         new_pop.individuals += task.result().individuals
                         new_pop.fitnesses += task.result().fitnesses
-                        new_pop.max_size = 1000
+                        new_pop.max_size = 2000
                         new_pop.av_pop_fitnesses.clear()
                         new_pop.av_pop_divergences.clear()
                         new_pop.roulette_ready = False
@@ -236,12 +236,12 @@ def find_max(alist):
             maxs = item
     return maxs
 def collect_data_greedy(m,n):
-    filename1 = "lt_ds_rloo_" + str(n) + '.xlsx'
+    filename1 = "lattice_table_greedy_double_slicing_rloo" + str(n) + '.xlsx'
     try:
         wb1 = openpyxl.load_workbook(filename1)
     except:
         wb1 = openpyxl.Workbook()
-    filename2 = "lt_ds_loo_" + str(n) + '.xlsx'
+    filename2 = "lattice_table_greedy_double_slicing_loo" + str(n) + '.xlsx'
     try:
         wb2 = openpyxl.load_workbook(filename2)
     except:
@@ -340,9 +340,10 @@ def test(size,j,m,n,k,kill_mode="non_bias_random",mode="roulette",norm=True, sca
 """
 if __name__ =="__main__":
      
-    for i in [3,4,5]:
-        #collect_data_greedy(i,i)
-        collect_data_genetic(i,i)
+collect_data_greedy(3,3)#This is to generate the excel files. but we have them already
+for i in range(6,12):
+   collect_data_genetic(i,3)#The different values of i should be ran on different cores since we run out of time
+   
 #We start at m = 6 because the brute force algorithm was already used to find values of m in the range [1,5]        
 core 1 : collect_data_genetic(6,3)
 core 2: collect_data_genetic(7,3)
