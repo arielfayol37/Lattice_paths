@@ -50,7 +50,7 @@ class Population():
         self.av_pop_fitnesses = []
         self.av_pop_divergences = []
         self.pool = []
-        self.eons = self.m**2 *1000
+        self.eons = self.m**2 * 1000
         self.scaled_fitnesses = []
         self.sa, self.sb = (0,0)
         self.min_fitness =0
@@ -699,7 +699,7 @@ class Population():
 
     def evolve(self,mode,kill_mode="non_bias_random"):
         found = self.initialize() 
-        self.fm = int(self.num_genes*(self.num_genes-1)/2)
+        self.fm = int(self.num_genes*(self.num_genes-1)/2) #fitness max
         acc_gen = 0.5* self.eons
         for i in range(1,self.eons):
             self.c_count = i
