@@ -1,5 +1,3 @@
-
-#This is Sequence.py
 #python3 Sequence.py
 import random
 from datetime import datetime
@@ -9,7 +7,10 @@ random.seed(getattr(datetime.now(), "microsecond"))
 
 
 class Sequence():
-    #generate a sequence(object containing a path) depends on the values of m and n
+    """A sequence is a path. Paths are generated in a lexicographical order by generate_all_paths() in lp_utils.py. So each path is indentified by an index
+    and we can either select one of them using its index or randomly pick one path"
+    """
+ 
     def __init__(self, m, n, paths=None, len_paths=None,index=None, empty=False):
         assert m >= n
         
@@ -17,11 +18,11 @@ class Sequence():
         
         if not empty:
             if index is None:
-                self.pi=random.randint(0,len_paths-1)
+                self.pi=random.randint(0,len_paths-1) #randomly choose an index to select a path
                 
             else:
                 self.pi = index
-            self.terms = paths[self.pi]       
+            self.terms = paths[self.pi]  #select a specific path from all paths     
    
         else:
             self.terms = []
@@ -36,10 +37,15 @@ class Sequence():
         return iter(self.terms)
     """                 
     def show(self):
+    """
+    Method to display a path(Sequence) on the screen
+    """
         for term in self.terms:
             print(term[0],term[1], term[2], sep=" ", end="   ")
     def compare(self,sequence,k):
- 
+    """
+    Method to compare if this instance's path is k-equivalent to another. Returns 0 if k-equivalent. Returns 1 if not.
+    """
         assert self.l == sequence.l
         equi= 0
          
@@ -54,12 +60,10 @@ class Sequence():
         else:
             return 1 #k-distinct
     def same_paths(self,sequence):
+     """
+     Method to check if this instance's path is the same as another's path
+     """
         assert self.l == sequence.l
-        """
-        for a,b in zip(self.terms, sequence.terms):
-            if a!=b:
-                return 0 #returns zero if paths are different
-        """
          
         return int(self.pi==sequence.pi) #returns one if paths are the same
  
