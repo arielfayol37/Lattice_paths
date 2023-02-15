@@ -1,36 +1,59 @@
 #This is Population.py
 #python3 Population.py
 
-""" Genetic program for Maths Research:finding k-distinct paths for an m by n lattice, m>=n 
+""" 
+    Genetic program for Maths Research:finding k-distinct paths for an m by n lattice, m>=n 
     All the paths share the same length and are the shortest when leaving from the topmost left corner of the lattice to the bottommost right corner of the lattice.
     All the edges are of length one unit. As such, each path is of length m+n units.
     Two paths are said to be k-distinct if they share at most k-1 edges.
-    So the aim of this program is to find the maximum number of k-distinct paths, given an m by n lattice and a parameter k
+    ****Solution to be found: So the aim of this program is to find the maximum number of k-distinct paths, given an m by n lattice and a parameter k***
 """
 from lp_utils import *
 from Genome import Genome
-#from Sequence import Sequence
-import logging
+import logging # Used during testing to put some text about the program in a file named 'myProgramLog.txt.'
+
 logging.basicConfig(filename='myProgramLog.txt', level=logging.DEBUG,\
                     format='%(asctime)s - %(levelname)s - %(message)s')
-logging.disable(logging.CRITICAL)
-#from Sequence import generate_all_paths
+
+logging.disable(logging.CRITICAL) # Logging disabled because we are done Testing.
+
 import os
 class Population():
+    """
+    This is the main class of the program.
+    Class to manage Genomes and the evolutionary process to find an asked or given solution.
+    For example, we may want to find a Genome object with j number of paths which are all k-distinct (perfect individual).
+    So running the evolve() method implemented in this class will attempt to do that.
+    
+    To find the maximum, solution we will keep incrementing the value of j until evolve() does not find
+    a perfect individual.
+    """
     def __init__(self,size,j, m, n, k,create_paths = True, norm = True, scale=True, temp=4.0):
+        """"
+        size: Initial size of population (number of genomes).
+        j: the target number of k-distinct paths for a lattice with dimensions m and n
+        m: number of rows of lattice
+        n:number of columns of lattice
+        k: maximum number of edges to be shared + 1
+        create_paths: if True, will create all the paths for the lattice. We don't need to do this
+                       each time we increment the value of j, hence we pass True only at the start 
+                       of the process
+        norm: if True, then we normalize the mating probabilities of Genomes before selecting mates, 
+              else we use softmax.
+        """
         assert m>0 and n>0 and m>=n 
-        self.individuals = []
-        self.children = []
+        self.individuals = [] # A list to contain the Genome objects
+        self.children = [] # A list to contain the new Genome objects during mating
         self.m = m
         self.n = n
         self.k = k
         self.size = size
-        self.fitnesses = []
-        self.divergences = []
-        self.c_fitnesses = []
-        #self.c_divergences = []
-        self.p_mating = [] 
-        self.indexes = []
+        self.fitnesses = [] # A list to contain the fitnesses of the Genomes
+        self.divergences = [] # A list to contain the divergences of the Genomes
+        self.c_fitnesses = [] #A list to contain the new Genome fitnesses during mating
+        
+        self.p_mating = [] # A list to containing the mating probabilities 
+        self.indexes = [] # Not a good variable name. This is used to represent the mating pool
         self.num_genes = j
         self.sorted = False
         self.max_size = int(size/2)
@@ -40,7 +63,7 @@ class Population():
         self.just_initialized = False
         self.norm = norm
         self.scale = scale
-        self.temperature = temp
+        self.temperature = temp # This is 
         if create_paths:
             
             self.paths = generate_all_paths(m,n)
