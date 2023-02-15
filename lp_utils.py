@@ -1,12 +1,16 @@
-#This is lp_utils.py
+
 #python3 lp_utils.py
 from decimal import *
-#from Sequence import Sequence
 import random 
  
 
 
 def translate(patA,to_lan):
+  """
+  Function to translate from the different fromats represent the paths.
+  to_lan takes either 'to_O' as argument to translate paths of the form EE..NEN.. to the form
+  001 011 110...; or takes 'to_A' to do the reverse translation.
+  """
     if to_lan == "to_O":
         num_0 =0
         num_1 =0
@@ -42,25 +46,32 @@ def translate(patA,to_lan):
         for term in patA:
             patO.append(term[2])
         return patO
-
-#def nsoftmax(x):
-    #return numpy.exp(x)/numpy.sum(numpy.exp(x))
+       
 def softmax(x):
+  """
+  Takes an array or list, the returns a softmax version of the list.
+  """
     soft = []
     for i in x:
         soft.append(Decimal(2.7)**Decimal(i))
-        #soft.append(2.7**i)
     sumo = sum(soft)
     for i in range(len(soft)):
         soft[i]/=sumo
     return soft
 def normalize(x):
-    
+    """
+    Normalizes the list x to values between 0 and 1.
+    """
     sumo=sum(x)
  
     return [i/sumo for i in x]          
  
-def dot_product(va,vb,a , b):
+def dot_product(va, vb, a, b):
+    """
+    The name of this function was wrongly chosen.
+    This is actually just the element-wise multiplication of two vectors va and vb,
+    scaled by a and b respectively.
+    """
     vc = []
     try:
         assert len(va) == len(vb)
@@ -71,7 +82,11 @@ def dot_product(va,vb,a , b):
         vc.append(va[i]*a + vb[i]*b)
      
     return vc
-def bubble_sort(pivot,b):
+def bubble_sort(pivot, b):
+    """
+    Bubble sort in unison two list using pivot, which must be a quantitative list(float or int),
+    as the list on which to base the comparisons.
+    """
     assert len(pivot)==len(b)
     for i in range(len(pivot)):
         for j in range(len(pivot)-i-1):
@@ -84,6 +99,9 @@ def bubble_sort(pivot,b):
                 b[j+1]= temp1
     return (pivot, b)
 def quick_sort(array):
+    """
+    Quicksort a list of Genome objects using their fitnesses.
+    """
     if (len(array))<2:
         return array
     else:
@@ -99,8 +117,10 @@ def quick_sort(array):
         
 
 
-# define a recursive function to generate the paths
 def generate_paths(current_row, current_col, path,m,n,paths = []):
+  """
+  A recursive function to generate all the paths of an m by n lattice.
+  """
   # check if the current position is the bottommost right corner
   if current_row == m and current_col == n:
     # if the current position is the bottommost right corner, add the current path to the list of paths
@@ -130,12 +150,16 @@ def generate_all_paths(m,n):
     return real_paths
        
 def factorial(n):
+    """
+    Calculates n factorial. n!
+    """
     if n == 1 or n==0:
         return 1
     else:
         return n * factorial(n-1)
 
 def combination(m,n):
+    """Calculates n combinations of m"""
     assert m>=n
     return factorial(m)/(factorial(n)*factorial(m-n))
     
