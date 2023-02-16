@@ -88,6 +88,11 @@ class Population():
 
 
     def compute_equivalences(self):
+        """"
+        Compute the equivalent paths to every path and store then in the self.equivalences dictionary such that 
+        the paths indices are keys and the indices of paths they are equivalent to are the values.
+        No return value
+        """
         self.equivalences.clear() # It might seem weird to clear this but note that the equivalences are dependent on the value of k, and further in the program
         # it might lead to an unanticipated bug if we decide to reuse an already advanced population with a different value of k.
         for i in range(self.l):
@@ -114,7 +119,9 @@ class Population():
 
     def initialize(self):
         """
-        Initialize (or refilling the population) by adding self.size number of individuals
+        Initialize (or refilling the population) by adding self.size number of individuals.
+        Returns True if perfect individual(with maximum possible fitness) is created during initialization.
+        Otherwise returns False.
         """
         logging.info("refilling")
         self.just_initialized = True
@@ -157,6 +164,7 @@ class Population():
         The distribution of all the paths in the population is calculated first. Where distribution for a path is the
             proportion of individuals in the population having that path.
         Then for each individual, the divergence is given by (1 - average of the distribution of its paths).
+        No return value
         """
         #self.find_best()
         self.distribution.clear()
@@ -198,6 +206,7 @@ class Population():
         This is done to avoid early convergence.
         Furthemore, another condition of the prescale is that self.sa and self.sb should be such that the average population scaled fitness is 
         about the same as the average population fitness, and that the minimum scaled fitness should be a positive number or 0.
+        No return value
         """
         uav = self.av_pop_fitnesses[-1]
         delta = self.best_fitness - uav
@@ -220,6 +229,7 @@ class Population():
     def scale_fitnesses(self):
         """
         Calculating the scaled fitnesses using the scaling factor and bias self.sa and self.sb calculated by prescale().
+        No return value
         """
         self.prescale()
         self.scaled_fitnesses.clear()
@@ -231,7 +241,8 @@ class Population():
 
     def compute_fitnesses(self):
         """
-        Computing every individual's fitness
+        Computing every individual's fitness.
+        No return value
         """
         l = len(self.individuals)
         self.fitnesses.clear()
@@ -241,8 +252,9 @@ class Population():
             
     def bsort(self):
         """"
-        Bubble sorting the population with respect to their fitnesses.  This can be used to compute mating probabilities based on ranks or in the methodbattle() 
+        Bubble sorting the population with respect to their fitnesses, from fittest to least fit.  This can be used to compute mating probabilities based on ranks or in the methodbattle() 
         to eliminate individuals.
+        No return value
         """
         if self.sorted==False:
             logging.info("sorting")
@@ -306,6 +318,7 @@ class Population():
         """
         Selecting two parents.
         mode: if "roulette" then compute mating probabilities if not yet computed, and select two individuals based on those probabilities.
+        Returns the indices of the selected parents
         """
         if mode == "roulette":
             """ Remainder stochastic sampling without replacement"""
@@ -370,6 +383,7 @@ class Population():
     def mating(self, mode = "random_random"):
         """
         Selecting parents and creating new individuals by crossover and mutation.
+        Does not return any value
         """
         logging.info("mating")
         self.just_initialized = False 
@@ -493,16 +507,16 @@ class Population():
                 """
                 new_child_2.mutate(self.equivalences) # mutate the individual by swapping a gene that is k-equivalent to another(or others) with another
                 # one randomly selected from the set of all genes, which is different from all the genes in the individuals
-                if j%100==0:
-                    new_child_1.nmutate(self.equivalences)
-                    new_child_3.smutate(self.equivalences,self.l)
+                if j%100==0: # mutate child 1 and 3 for every 100th mating
+                    new_child_1.nmutate(self.equivalences) # This randomly changes a gene, even if it was k-distinct to all other paths.
+                    new_child_3.smutate(self.equivalences,self.l) # Same as smutate, but in addition, it might be swapped for a gene already present in the chromosome
                 a = new_child_1.fitness(self.equivalences,False)
                 b = new_child_2.fitness(self.equivalences,False)
                 c = new_child_3.fitness(self.equivalences,False)
                 self.children.append(new_child_1)
                 self.children.append(new_child_2)
                 self.children.append(new_child_3)
-                self.c_fitnesses.append(a)#you don't need tis , you can actually append directly to te oriinal lists
+                self.c_fitnesses.append(a) 
                 self.c_fitnesses.append(b)
                 self.c_fitnesses.append(c)
  
@@ -511,65 +525,54 @@ class Population():
         self.sorted = False
         self.children.clear()
         self.fitnesses+=self.c_fitnesses
-        self.c_fitnesses.clear()
-         
-         
-         
-        self.roulette_ready = False
-        
-      
-
-
-
-
-
-
-
-
-
-
-
+        self.c_fitnesses.clear() 
+        self.roulette_ready = False # We have to recompute the mating probabilities and mating pool for the next generation.
+             
 
 
     def find_best(self):
-        assert len(self.individuals)==len(self.fitnesses), "individuals list and fitnesses list are different in size"
+        """
+        Finding the index of the individual with the highest fitness in the population. Does not return anything but assigns the best index to self.bfi
+        and assigns the worst fitness(not index) to self.min_fitness
+        """
+        assert len(self.individuals)==len(self.fitnesses), "individuals list and fitnesses list are different in size in self.find_best()"
         self.min_fitness = self.fitnesses[0] 
         for i in range(len(self.fitnesses)):
             if self.fitnesses[i] >= self.best_fitness: #it as to be greater or equal to for cal_div to work properly
                 self.best_fitness = self.fitnesses[i]
-                self.bfi = i
-
+                self.bfi = i # best fitness index
             if self.fitnesses[i] <= self.min_fitness:
                 self.min_fitness = self.fitnesses[i]           
 
 
 
-
-
     def check(self, mode, test=True):
+        """
+        Finding the best individual in the population and checking whether its fitness is the maximum possible fitness (perfect individual).
+        Displays this individual if so, otherwise just prints its fitness to console.
+        Returns True if perfect individual found, otherwise return False.
+        """
         logging.info("checking\n")
 
-        if mode == "roulette" or mode=="random_random":
-            
-            self.bsort()
+        if mode == "roulette" or mode=="random_random": # This is option is not used anymore or it is used only for testing
+            self.bsort() # Sorting the population from fittest individuals to least fit
             for fitness in self.fitnesses[:10]:
-                ##print(fitness)
-            #if self.individuals[0].fitness()[0] == 9999:
-                ##print(len(self.individuals))
-                #self.individuals[0].show(self.paths)    
+                print(fitness)
+            if self.individuals[0].fitness()[0] == 9999:
+                print(len(self.individuals))
+                self.individuals[0].show(self.paths)    
                 return True
             else:
                 return False
         else:
             self.find_best()
             if test:
-                #assert len(self.fitnesses) == len(self.individuals)
+                
                 for s in range(len(self.individuals)):
                     try:
                         assert self.individuals[s].fitness(self.equivalences,False) == self.fitnesses[s]
-                    except:
-                        #print("real: ",self.individuals[s].fitness(self.equivalences,False),"calculated: ",self.fitnesses[s], "index: ", s)    
-                        raise Exception("Difference between real fitness and calculated fitness")
+                    except:    
+                        raise Exception("Difference between real fitness and calculated fitness in self.check()")
             
             if self.best_fitness == 9999:
                 assert self.individuals[self.bfi].fitness(self.equivalences, False) == 9999
@@ -585,33 +588,22 @@ class Population():
                     #,self.best_fitness,"/", self.fm, "sizeofPop: ", len(self.individuals), "\n")
                 #assert self.individuals[self.bfi].fitness()[0] == self.best_fitness
                 return False    
-                #divergences not updated at this point
+                #   divergences not updated at this point
         return False        
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     def evolve(self,mode,kill_mode="non_bias_random"):
-        found = self.initialize() 
-        self.fm = int(self.num_genes*(self.num_genes-1)/2) #fitness max
-        acc_gen = 0.5* self.eons
+        """
+        Wrapping method of the Population class. This initializes individuals then for each epoch or generation, performs the mating process
+        and checking whether a perfect individual has been found. If yes, it returns that individual. 
+        If after self.m **2 * 1000 epochs the solution is not found, then it just returns the best individual at that generation.
+        """
+        found = self.initialize() # Initialize individuals
+        self.fm = int(self.num_genes*(self.num_genes-1)/2) # Maximum possible raw fitness
+        acc_gen = int(0.7* self.eons) # the epoch after which we want softmax() to be the main normalizing function.
         for i in range(1,self.eons):
             self.c_count = i
-            #print(self.c_count)
             if found == False:
                 if self.just_initialized==False:
                     self.battle(kill_mode)
@@ -624,18 +616,16 @@ class Population():
                     found = self.check("speedy",test=False)
 
             else:
-                
-                
                 #print("self.bfi = ", self.bfi)
                 #print("solutions = {},m = {}, n = {}, k = {}".format(self.num_genes,self.m,self.n, self.k))
                 #print("size of population", len(self.individuals), "best fitness", self.best_fitness)
                 return self.individuals[self.bfi]
                  
             if (i)%50 == 0:
-                found = self.initialize()
+                found = self.initialize() # After every 50 generations, we refill the population to maintain some gene diversity
                 self.sorted = False
                 self.roulette_ready = False
-                self.norm = True
+                self.norm = True 
             if i >= int(self.eons - acc_gen):
                 self.norm = False
                 
@@ -647,6 +637,10 @@ class Population():
 
 
     def visualize_evolution(self):
+        """
+        Plotting how the average divergence and fitness change over time along with the maximum fitness.
+        No return value.
+        """
         import matplotlib.pyplot as plt
         plt.plot(range(len(self.max_fitnesses)),self.max_fitnesses,color="blue", label = "Best fitness")
         plt.plot(range(len(self.av_pop_fitnesses)),self.av_pop_fitnesses,color="red", label = "Av pop fitness" )
