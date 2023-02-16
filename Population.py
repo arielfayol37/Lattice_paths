@@ -1,4 +1,3 @@
-#This is Population.py
 #python3 Population.py
 
 """ 
@@ -53,34 +52,34 @@ class Population():
         self.c_fitnesses = [] #A list to contain the new Genome fitnesses during mating
         
         self.p_mating = [] # A list to containing the mating probabilities 
+        self.mating_rate = 0.7 # Proportion of indivdiuals mating at each generation
         self.indexes = [] # Not a good variable name. This is used to represent the mating pool
         self.num_genes = j
-        self.sorted = False
+        self.sorted = False # Boolean to check if population is sorted with respect to fitness
         self.max_size = int(size/2)
-        self.roulette_ready = False
+        self.roulette_ready = False # Boolean to determine whether the mating pool is ready
         self.best_fitness = 0
-        self.bfi = 0
+        self.bfi = 0 # best fitness index
         self.just_initialized = False
         self.norm = norm
         self.scale = scale
         self.temperature = temp # This is 
         if create_paths:
-            
             self.paths = generate_all_paths(m,n)
             self.l = len(self.paths)
-        self.ci = 0   #index of path from C 
-        self.max_fitnesses = []
-        self.av_pop_fitnesses = []
-        self.av_pop_divergences = []
-        self.pool = []
-        self.eons = self.m**2 * 1000
+        self.ci = 0   # index of path from C 
+        self.max_fitnesses = [] # maximum fitnesses over generations
+        self.av_pop_fitnesses = [] # average population fitnesses over generations
+        self.av_pop_divergences = [] # average population divergences over generations
+        self.pool = [] # Mating pool
+        self.eons = self.m**2 * 1000 # The number of generations
         self.scaled_fitnesses = []
-        self.sa, self.sb = (0,0)
+        self.sa, self.sb = (0,0) # Scaling factor, sa, and scaling bias sb 
         self.min_fitness =0
         self.c_count = 0
-        self.equivalences = dict()
-        self.compute_equivalences()
-        self.distribution = dict() 
+        self.equivalences = dict() # To store the paths indices as keys and the indices of paths they are equivalent to as values
+        self.compute_equivalences() 
+        self.distribution = dict() # Used to store the paths indices as keys and the number of individuals who contain those paths as values
          
 
 
@@ -89,22 +88,22 @@ class Population():
 
 
     def compute_equivalences(self):
-        self.equivalences.clear()
+        self.equivalences.clear() # It might seem weird to clear this but note that the equivalences are dependent on the value of k, and further in the program
+        # it might lead to an unanticipated bug if we decide to reuse an already advanced population with a different value of k.
         for i in range(self.l):
-            foo = self.equivalences.setdefault(str(i), set([i]))
+            foo = self.equivalences.setdefault(str(i), set([i])) # we don't need the return value of setdefault()
              
             
-        for i in range(self.l):
+        for i in range(self.l): # We compare each path to every other
             for j in range(i+1,self.l):
-                equi = 0
-                for a,b in zip(self.paths[i], self.paths[j]):
-                    if a == b:#can make tis better someow
-                        equi += 1
-                        #if k-equivalent
-                        if equi == self.k:
+                equi = 0 # Number of shared edges
+                for a,b in zip(self.paths[i], self.paths[j]): # For every term(edge) a in path i and b in path j.
+                    if a == b: 
+                        equi += 1 
+                        if equi == self.k: #if k-equivalent
                             self.equivalences[str(i)].add(j)  
                             self.equivalences[str(j)].add(i) 
-                            break
+                            break # We don't need to compare the edges any further
                        
          
 
@@ -114,12 +113,15 @@ class Population():
 
 
     def initialize(self):
+        """
+        Initialize (or refilling the population) by adding self.size number of individuals
+        """
         logging.info("refilling")
         self.just_initialized = True
          
         
         for r in range(50):
-            #creating individuals which will take paths from C
+            # creating individuals which will sequencially take all the paths from C
             new_genome = Genome(self.num_genes,self.m,self.n,self.k,self.paths,self.l,True)#Creating individual with no paths yet
             for s in range(self.num_genes):
                 i =  self.ci%self.l 
@@ -136,7 +138,7 @@ class Population():
             
         for z  in range(int(new_indi_coef*self.size)):
              
-            #creating random people with random paths now
+            # creating random people with random paths
             new_genome = Genome(self.num_genes,self.m,self.n,self.k,self.paths,self.l)
  
              
@@ -149,13 +151,13 @@ class Population():
 
 
 
-
-
-
-
-
-
     def cal_div(self, sort = True):
+        """
+        To calculate the divergence of each individual in the population.
+        The distribution of all the paths in the population is calculated first. Where distribution for a path is the
+            proportion of individuals in the population having that path.
+        Then for each individual, the divergence is given by (1 - average of the distribution of its paths).
+        """
         #self.find_best()
         self.distribution.clear()
         self.divergences.clear()
@@ -169,24 +171,34 @@ class Population():
         for indi in self.individuals:
             self.divergences.append(1-(sum([self.distribution[str(i)] for i in indi.sequences]))/denominator)
          
-        assert len(self.divergences)==len(self.individuals)     
+        assert len(self.divergences)==len(self.individuals), "difference in size of divergences and individuals list in cal_div()"     
         av_div= sum(self.divergences)/len(self.individuals)     
         self.av_pop_divergences.append(av_div)
          
      
          
-        assert len(self.fitnesses)==len(self.individuals), "line 155: difference in len of fitnesses and individuals"
+        assert len(self.fitnesses)==len(self.individuals), "difference in size of fitnesses and individuals list in cal_div()"
         av = sum(self.fitnesses)/len(self.fitnesses)
         try:
-            if av==self.av_pop_fitnesses[-30]:
+            if av==self.av_pop_fitnesses[-30]: # If the current average fitness is the same as that of 30 generations ago, then
+                # the evolution has stagnated and we set self.norm to False so that the normalization will use softmax() for mating probabilities
+                # to give significantly higher mating probabilities to fitter individuals(chromosomes or genomes).
                 self.norm = False
         except:
             pass
         self.av_pop_fitnesses.append(av) 
         self.max_fitnesses.append(self.best_fitness)
         
-    #continuation of Population class
+   
     def prescale(self):
+        """
+        Calculating the fitness scaling factor and bias, self.sa and self.sb, such that at the start of the evolution
+        the maximum scaled fitness is only about 1.5 times the average scaled fitness, and that as generations(epochs) go by
+        the maximum scaled fitness increases such that in the final generation, it is self.temperature times the average scaled fitness.
+        This is done to avoid early convergence.
+        Furthemore, another condition of the prescale is that self.sa and self.sb should be such that the average population scaled fitness is 
+        about the same as the average population fitness, and that the minimum scaled fitness should be a positive number or 0.
+        """
         uav = self.av_pop_fitnesses[-1]
         delta = self.best_fitness - uav
         fmultiple = 1.5 + (self.temperature-1.5)*self.c_count/self.eons 
@@ -204,10 +216,11 @@ class Population():
                 self.sb = self.min_fitness*uav*-1.0 / delta    
 
     
-    
-    
-    
+     
     def scale_fitnesses(self):
+        """
+        Calculating the scaled fitnesses using the scaling factor and bias self.sa and self.sb calculated by prescale().
+        """
         self.prescale()
         self.scaled_fitnesses.clear()
         for f in self.fitnesses:
@@ -216,44 +229,26 @@ class Population():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-    def bsort(self):
-        """ 
-        try:
-            assert self.sorted == False
-        except:
-            raise Exception("Called bsort() when already sorted")
+    def compute_fitnesses(self):
+        """
+        Computing every individual's fitness
+        """
+        l = len(self.individuals)
+        self.fitnesses.clear()
+        for i in range(l):
+            self.fitnesses.append(self.individuals[i].fitness(self.equivalences,False))   
             
-        try:
-            assert len(self.individuals) == len(self.fitnesses)
-        except:
-            #print(len(self.fitnesses), len(self.individuals))
-            raise Exception("fitnesses and individuals should have\
-                the same length")
-            for i in range(len(self.individuals)):
-                #print(self.fitnesses[i], self.individuals[i].fitness()[0], self.divergences[i])
-        """            
-
+            
+    def bsort(self):
+        """"
+        Bubble sorting the population with respect to their fitnesses.  This can be used to compute mating probabilities based on ranks or in the methodbattle() 
+        to eliminate individuals.
+        """
         if self.sorted==False:
             logging.info("sorting")
-            #self.individuals = quick_sort(self.individuals)
-            
-            l = len(self.individuals)
-            self.fitnesses.clear()
-            for i in range(l):
-                self.fitnesses.append(self.individuals[i].fitness(self.equivalences,False))
+            self.compute_fitnesses() # Computing the fitnesses
                    
-            for i in range(l):
+            for i in range(l): 
                 swapped = False
                 for j in range(0,l-i-1):
                     if self.fitnesses[j] <= self.fitnesses[j+1]:
@@ -271,57 +266,32 @@ class Population():
                 if swapped == False:
                     break
                       
-            self.bfi = 0
+            self.bfi = 0 
             self.best_fitness = self.fitnesses[0]            
             self.sorted = True
             
-            """ 
-            sumsee = 0
-            for a in range(len(self.individuals)):
-                sumsee+=self.fitnesses[a]                    
-                #assert self.individuals[a].fitness()[0] == self.fitnesses[a],"difference between calculated fitness and real fitness"
-    
-            av = sumsee/len(self.individuals)
-            try:
-                if av==self.av_pop_fitnesses[-30]:
-                    self.norm = False
-            except:
-                pass
-            self.av_pop_fitnesses.append(av) 
-            self.max_fitnesses.append(self.best_fitness)        
-            """
-
-
-
-
-
-
-  
-
-
-
-
-
 
 
 
     def battle(self, mode = "non_bias_random"):
+        """
+        To reduce the population size base on their fitness. Fitter people survive.
+        Mode: if "non_bias_random" then pairs of individuals are selected at random and the one with the lower fitness is 'killed'.
+              if "kill_bottom" then sort the population and 'kill' the bottom people
+        """
         logging.info("battling")
         if mode == "non_bias_random":
             while(len(self.individuals) > self.max_size):
                 index_1 = random.randint(0, len(self.individuals)-1) #we subtract 1 bescause the randint() function includes the bounds
                 index_2 = random.randint(0, len(self.individuals)-1)
-                while index_1 == index_2:
+                while index_1 == index_2: # This might waste time or even lead to an infinite loop (bug) if the population size is too small
                     index_2 = random.randint(0, len(self.individuals)-1)
                 if self.fitnesses[index_1] < self.fitnesses[index_2]:
                     self.fitnesses.pop(index_1)
                     self.individuals.pop(index_1)
-                    #self.divergences.pop(index_1)
-                #elif population[index_1].fitness()[0] > population[index_2].fitness()[0]:
                 else:
                     self.fitnesses.pop(index_2)
                     self.individuals.pop(index_2)
-                    #self.divergences.pop(index_2)
 
         elif mode =="kill_bottom":
             self.bsort()
@@ -332,79 +302,57 @@ class Population():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    #continuation of Population class
     def parent_pick(self, mode = "roulette"):
-        #assert len(self.fitnesses) == len(self.individuals)
-        
+        """
+        Selecting two parents.
+        mode: if "roulette" then compute mating probabilities if not yet computed, and select two individuals based on those probabilities.
+        """
         if mode == "roulette":
             """ Remainder stochastic sampling without replacement"""
             if not self.roulette_ready:
-                self.cal_div(sort=False)
-                
-                self.indexes = [v for v in range(len(self.individuals))]
- 
-                assert sum(self.p_mating) != 1
+                self.cal_div(sort=False) # Calculating divergences
+                self.indexes = [v for v in range(len(self.individuals))] 
                 self.p_mating.clear()
+                v = 0.5
+                v_prime  = self.fm * (1-v) # weight for fitnesses and divergences respectively, when computing the mating probability
+                # we want to ensure that the fitness and divergences are considered equally                
                 if self.scale:
                     self.scale_fitnesses()
-
-                    df_scores = dot_product(self.scaled_fitnesses, self.divergences, 0.5,self.fm*0.5)
-                    #df_scores = self.scaled_fitnesses        
+                    # TO DO: Check whether you have to use something else rather than self.fm for v_prime in this case.
+                    # because when scaled, the fitnesses get higher than their initial ranges.
+                    # When I initially checked this, nothing seemed unusual though
+                    df_scores = dot_product(self.scaled_fitnesses, self.divergences, v, v_prime)     
                 else:
-                    #pass
-                    df_scores = dot_product(self.fitnesses, self.divergences, 0.5,self.fm* 0.5)
+                    df_scores = dot_product(self.fitnesses, self.divergences, v, v_prime)
                 if self.norm:
                     self.p_mating = normalize(df_scores)
                 else:
                     self.p_mating = softmax(df_scores)    
-                n = int(len(self.individuals)*1.7)
-                self.pool = []
-                assert len(self.indexes) == len(self.p_mating), "Different size between self.indexes and self.p_mating"
+                n = int(len(self.individuals)*(2*self.mating_rate+0.2)) # Make sure the number here is a little more than twice than the mating rate.
+                # otherwise the mating pool will be empty
+             
+                self.pool.clear() 
+                assert len(self.indexes) == len(self.p_mating), "Different size between self.indexes and self.p_mating in parent_pick()"
+                
                 for u in range(len(self.p_mating)):
+                    # Creating copies of individuals based on mating probabilities to put in the mating pool
                     self.p_mating[u] *=n
                     whole = int(self.p_mating[u])
                     for s in range(whole):
                         self.pool.append(self.indexes[u])
-                    rand = int.from_bytes(os.urandom(8),byteorder="big")/((1<<64)-1)
-                    if rand<= (self.p_mating[u]-whole):#Bernoulli trial
+                    rand = int.from_bytes(os.urandom(8),byteorder="big")/((1<<64)-1) # Generating random float between 0 and 1
+                    if rand<= (self.p_mating[u]-whole): # Bernoulli trial
                         self.pool.append(self.indexes[u])    
 
                 self.roulette_ready = True
                  
-            rand1 = random.randint(0,len(self.pool)-1)#might raise an error if pool is empty
+            rand1 = random.randint(0,len(self.pool)-1)  # might raise an error(bug) if pool is empty
             parent_1_index = self.pool[rand1]
             self.pool.pop(rand1)
-            
             rand2 = random.randint(0,len(self.pool)-1)    
             parent_2_index = self.pool[rand2]
             self.pool.pop(rand2)
-            #without replacement
-            #try:in case rand1 == rand2 and pool is empty 
-                #without replacement
-            #except:
-                #pass
-            
+
   
             return (parent_1_index, parent_2_index)
 
@@ -412,43 +360,53 @@ class Population():
         elif mode == "random_random":
             parent_1_index = random.randint(0, len(self.individuals)-1)
             parent_2_index = random.randint(0, len(self.individuals)-1)
-            while parent_1_index == parent_2_index:
+            while parent_1_index == parent_2_index: # might lead to infinite loop(bug) if population size too small
                 parent_2_index = random.randint(0, len(self.individuals)-1)
             return (parent_1_index, parent_2_index)
             
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    #continuation of Population class
     def mating(self, mode = "random_random"):
+        """
+        Selecting parents and creating new individuals by crossover and mutation.
+        """
         logging.info("mating")
-        mating_coef = 0.7
         self.just_initialized = False 
         l = len(self.individuals)
-        for j in range(int(mating_coef * l)):
-            co_coef = int.from_bytes(os.urandom(8),byteorder="big")/((1<<64)-1)#cross over coef
+        for j in range(int(self.mating_rate * l)):
+            co_coef = int.from_bytes(os.urandom(8),byteorder="big")/((1<<64)-1) #randomly generate cross over coeficient to determing where cross over will take place
+            # in the parent chromosomes or parent individuals.
             parent_1_index, parent_2_index = self.parent_pick(mode)
             if parent_1_index != parent_2_index:
-
-                encoding_part_1 = random.randint(1,2) #first sequences of genes of child 1 come from parent 1
-
-                new_child_1 = Genome(self.num_genes,self.m,self.n,self.k,self.paths,self.l,True) #create empty child
+                new_child_1 = Genome(self.num_genes,self.m,self.n,self.k,self.paths,self.l,True) # create empty individual (without genes)
                 new_child_2 = Genome(self.num_genes, self.m,self.n,self.k,self.paths,self.l,True)
                 new_child_3 = Genome(self.num_genes, self.m,self.n,self.k,self.paths,self.l,True)
+                start_index = int(self.num_genes * co_coef)
+                
+                # crossover
+                for s in range(self.num_genes):
+                    i = self.individuals[parent_1_index].sequences[s]
+                    j = self.individuals[parent_2_index].sequences[s]
+                    new_child_3.sequences[s] = i
+
+                    if s < start_index:
+                        i, j = j, i
+
+                    if i not in new_child_1.sequences:
+                        new_child_1.take_paths.remove(i)
+                        new_child_1.sequences[s] = i
+                    else:
+                        r = random.randint(0, len(new_child_1.take_paths) - 1)
+                        new_child_1.sequences[s] = new_child_1.take_paths.pop(r)
+
+                    if j not in new_child_2.sequences:
+                        new_child_2.take_paths.remove(j)
+                        new_child_2.sequences[s] = j
+                    else:
+                        r = random.randint(0, len(new_child_2.take_paths) - 1)
+                        new_child_2.sequences[s] = new_child_2.take_paths.pop(r)
+                """"
                 if encoding_part_1 == 1:#you can reduce this to two for loops ... indexin usin num_genes-s maybe
                     for s in range(int(self.num_genes * co_coef)):
                         i = self.individuals[parent_1_index].sequences[s]
@@ -470,26 +428,7 @@ class Population():
                             new_child_2.sequences[s] = new_child_2.take_paths[r]
                             new_child_2.take_paths.pop(r)  
                            
-                        """
-                        try:
-                            new_child_1.take_paths.remove(i)
-                            new_child_1.sequences[s] = i
-                            
-                        except ValueError:
-                            r = random.randint(0,len(new_child_1.take_paths)-1) 
-                            new_child_1.sequences[s] = new_child_1.take_paths[r]
-                            new_child_1.take_paths.pop(r)
-                         
-                        try:
-                            new_child_2.take_paths.remove(j)
-                            new_child_2.sequences[s] =j 
-                             
-                        except ValueError:
-                            r = random.randint(0,len(new_child_2.take_paths)-1) 
-                            new_child_2.sequences[s] = new_child_2.take_paths[r]
-                            new_child_2.take_paths.pop(r)
-                        """      
-                         
+
                     for s in range(int(self.num_genes*co_coef), self.num_genes):
                         i = self.individuals[parent_2_index].sequences[s]
                         j = self.individuals[parent_1_index].sequences[s]
@@ -509,25 +448,7 @@ class Population():
                             r = random.randint(0,len(new_child_2.take_paths)-1) 
                             new_child_2.sequences[s] = new_child_2.take_paths[r]
                             new_child_2.take_paths.pop(r)  
-                        """
-                        try:
-                            new_child_1.take_paths.remove(i)
-                            new_child_1.sequences[s] = i
-                            
-                        except ValueError:
-                            r = random.randint(0,len(new_child_1.take_paths)-1) 
-                            new_child_1.sequences[s] = new_child_1.take_paths[r]
-                            new_child_1.take_paths.pop(r)
-                         
-                        try:
-                            new_child_2.take_paths.remove(j)
-                            new_child_2.sequences[s] =j 
-                             
-                        except ValueError:
-                            r = random.randint(0,len(new_child_2.take_paths)-1) 
-                            new_child_2.sequences[s] = new_child_2.take_paths[r]
-                            new_child_2.take_paths.pop(r)
-                        """     
+ 
                 else:
                     for s in range(int(self.num_genes*co_coef), self.num_genes):
                            
@@ -549,25 +470,7 @@ class Population():
                             r = random.randint(0,len(new_child_2.take_paths)-1) 
                             new_child_2.sequences[s] = new_child_2.take_paths[r]
                             new_child_2.take_paths.pop(r)
-                        """       
-                        try:
-                            new_child_1.take_paths.remove(i)
-                            new_child_1.sequences[s] = i
-                            
-                        except ValueError:
-                            r = random.randint(0,len(new_child_1.take_paths)-1) 
-                            new_child_1.sequences[s] = new_child_1.take_paths[r]
-                            new_child_1.take_paths.pop(r)
-                         
-                        try:
-                            new_child_2.take_paths.remove(j)
-                            new_child_2.sequences[s] =j 
-                             
-                        except ValueError:
-                            r = random.randint(0,len(new_child_2.take_paths)-1) 
-                            new_child_2.sequences[s] = new_child_2.take_paths[r]
-                            new_child_2.take_paths.pop(r)
-                        """     
+
                     for s in range(int(self.num_genes * co_coef)):
                         new_child_3.sequences[s] = i    
                         i = self.individuals[parent_2_index].sequences[s]
@@ -587,27 +490,9 @@ class Population():
                             r = random.randint(0,len(new_child_2.take_paths)-1) 
                             new_child_2.sequences[s] = new_child_2.take_paths[r]
                             new_child_2.take_paths.pop(r)
-
-                        """
-                        try:
-                            new_child_1.take_paths.remove(i)
-                            new_child_1.sequences[s] = i
-                            
-                        except ValueError:
-                            r = random.randint(0,len(new_child_1.take_paths)-1) 
-                            new_child_1.sequences[s] = new_child_1.take_paths[r]
-                            new_child_1.take_paths.pop(r)
-                         
-                        try:
-                            new_child_2.take_paths.remove(j)
-                            new_child_2.sequences[s] =j 
-                             
-                        except ValueError :
-                            r = random.randint(0,len(new_child_2.take_paths)-1) 
-                            new_child_2.sequences[s] = new_child_2.take_paths[r]
-                            new_child_2.take_paths.pop(r)
-                        """     
-                new_child_2.mutate(self.equivalences)
+                """
+                new_child_2.mutate(self.equivalences) # mutate the individual by swapping a gene that is k-equivalent to another(or others) with another
+                # one randomly selected from the set of all genes, which is different from all the genes in the individuals
                 if j%100==0:
                     new_child_1.nmutate(self.equivalences)
                     new_child_3.smutate(self.equivalences,self.l)
