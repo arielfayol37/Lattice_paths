@@ -19,7 +19,7 @@ logging.basicConfig(
 
 logging.disable(logging.CRITICAL)  # Logging disabled because we are done Testing.
 
-import os
+import os, random
 
 
 class Population:
