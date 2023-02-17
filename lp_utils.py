@@ -1,16 +1,15 @@
 
 #python3 lp_utils.py
 from decimal import *
-import random 
  
 
 
 def translate(patA,to_lan):
-  """
+    """
   Function to translate from the different fromats represent the paths.
   to_lan takes either 'to_O' as argument to translate paths of the form EE..NEN.. to the form
   001 011 110...; or takes 'to_A' to do the reverse translation.
-  """
+    """
     if to_lan == "to_O":
         num_0 =0
         num_1 =0
@@ -48,9 +47,9 @@ def translate(patA,to_lan):
         return patO
        
 def softmax(x):
-  """
+    """
   Takes an array or list, the returns a softmax version of the list.
-  """
+    """
     soft = []
     for i in x:
         soft.append(Decimal(2.7)**Decimal(i))
