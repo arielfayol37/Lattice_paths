@@ -72,7 +72,7 @@ class Population():
         self.av_pop_fitnesses = [] # average population fitnesses over generations
         self.av_pop_divergences = [] # average population divergences over generations
         self.pool = [] # Mating pool
-        self.eons = self.m**2 * 1000 # The number of generations
+        self.eons = self.m* self.n * self.k * 1000 # The number of generations
         self.scaled_fitnesses = []
         self.sa, self.sb = (0,0) # Scaling factor, sa, and scaling bias sb 
         self.min_fitness =0
