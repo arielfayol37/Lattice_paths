@@ -1,7 +1,7 @@
 
 #python3 lp_utils.py
 from decimal import *
- 
+import numpy as np 
 
 
 def translate(patA,to_lan):
@@ -46,7 +46,7 @@ def translate(patA,to_lan):
             patO.append(term[2])
         return patO
        
-def softmax(x):
+def nsoftmax(x):
     """
   Takes an array or list, the returns a softmax version of the list.
     """
@@ -57,6 +57,13 @@ def softmax(x):
     for i in range(len(soft)):
         soft[i]/=sumo
     return soft
+def softmax(x):
+    """
+    Numpy softmax()
+    """
+    exps = np.exp(x)
+    return exps/np.sum(exps)
+
 def normalize(x):
     """
     Normalizes the list x to values between 0 and 1.
@@ -65,9 +72,9 @@ def normalize(x):
  
     return [i/sumo for i in x]          
  
-def dot_product(va, vb, a, b):
+def elem_wise_mult(va, vb, a, b):
     """
-    The name of this function was wrongly chosen.
+    
     This is actually just the element-wise multiplication of two vectors va and vb,
     scaled by a and b respectively.
     """
