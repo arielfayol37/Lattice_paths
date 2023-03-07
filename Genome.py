@@ -86,14 +86,15 @@ class Genome:
                     ):  # are k-equivalent
                         penalty += 1
                         penalty_index.append([i, j])
-                    else:
-                        distinct += 1
+                    #else:
+                        #distinct += 1
             if penalty == 0:
                 # If the penalty is 0, return a large value and the empty penalty index.
                 return (9999, penalty_index)
 
             # Return the number of k-distinct comparisons and the indexes of k-equivalent comparisons.
-            return (distinct, penalty_index)
+            #return (distinct, penalty_index)
+            return (1/penalty, penalty_index)
         else:
             # If the penalty_indexes parameter is False, only calculate the penalty.
             for i in range(self.num_sequences):
@@ -101,14 +102,15 @@ class Genome:
                     if self.sequences[j] in dict_equivalences[str(self.sequences[i])]:
                         penalty += 1
 
-                    else:
-                        distinct += 1
+                    #else:
+                        #distinct += 1
 
             if penalty == 0:
                 # If the penalty is 0, return a large value.
                 return 9999
 
-            return distinct
+            #return distinct
+            return 1/penalty
 
     def divert(self, other):
         """
@@ -231,3 +233,5 @@ class Genome:
                 translate(self.sequences[seq], "to_A"), self.m, self.n, o * i, seq
             )
             i += 1
+    def __repr__(self):
+        return f"Genome(num_genes = {self.num_sequences}, m = {self.m}, n = {self.n}, k= {self.k})"
