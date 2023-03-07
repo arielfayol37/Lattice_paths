@@ -58,10 +58,10 @@ def collect_data_genetic(m, n):
                 target += 1
                 run, ci = parallel_search(target=target, m=i, n=n, k=k)
             try:
-                if int(wb["Sheet"].cell(i + 1, k + 1).value) < target:
-                    wb["Sheet"].cell(i + 1, k + 1).value = target
+                if int(wb["Sheet"].cell(i + 1, k + 1).value) < target-1:# must be minus one here
+                    wb["Sheet"].cell(i + 1, k + 1).value = target-1
             except:
-                wb["Sheet"].cell(i + 1, k + 1).value = target
+                wb["Sheet"].cell(i + 1, k + 1).value = target-1
             wb.save(filename)
             shelfFile[
                 "list_of_configs"
@@ -73,7 +73,7 @@ def collect_data_genetic(m, n):
 
 def search(
     size,
-    j,
+    target,
     m,
     n,
     k,
@@ -95,7 +95,7 @@ def search(
 
     """
 
-    world = Population(size, j, m, n, k, norm=norm, scale=scale, temp=temp)
+    world = Population(size, target, m, n, k, norm=norm, scale=scale, temp=temp)
     best = world.evolve(mode, kill_mode)
     if draw:
         best.draw()
@@ -116,7 +116,7 @@ def parallel_search(target, m, n, k):
     evolution_parameters = [
         {
             "size": 1000,
-            "j": target,
+            "target": target,
             "m": m,
             "n": n,
             "k": k,
@@ -125,7 +125,7 @@ def parallel_search(target, m, n, k):
         },
         {
             "size": 2000,
-            "j": target,
+            "target": target,
             "m": m,
             "n": n,
             "k": k,
@@ -134,7 +134,7 @@ def parallel_search(target, m, n, k):
         },
         {
             "size": 5000,
-            "j": target,
+            "target": target,
             "m": m,
             "n": n,
             "k": k,
@@ -143,7 +143,7 @@ def parallel_search(target, m, n, k):
         },
         {
             "size": 10000,
-            "j": target,
+            "target": target,
             "m": m,
             "n": n,
             "k": k,
@@ -227,7 +227,7 @@ def parallel_search(target, m, n, k):
     print("Done with all tasks")
     result.individuals[result.bfi].show(result.paths)
     f = result.fitnesses[result.bfi]
-
+    shelfFile.close()
     print("BestFitness:", f, "/", result.fm, " Config_index: ", config_index)
     if f == 9999:
         return (True, config_index)
@@ -460,7 +460,7 @@ def compare_kill_mode():
 
 def test(
     size,
-    j,
+    target,
     m,
     n,
     k,
@@ -477,7 +477,7 @@ def test(
     No return value.
     """
     start_time = time.perf_counter()
-    world = Population(size, j, m, n, k, norm=norm, scale=scale, temp=temp)
+    world = Population(size, target, m, n, k, norm=norm, scale=scale, temp=temp)
 
     best = world.evolve(mode, kill_mode)
     end_time = time.perf_counter()
