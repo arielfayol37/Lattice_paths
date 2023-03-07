@@ -34,7 +34,7 @@ class Population:
     """
 
     def __init__(
-        self, size, j, m, n, k, create_paths=True, norm=True, scale=True, temp=4.0
+        self, size, target, m, n, k, create_paths=True, norm=True, scale=True, temp=4.0
     ):
         """ "
         size: Initial size of population (number of genomes).
@@ -66,7 +66,7 @@ class Population:
         self.indexes = (
             []
         )  # Not a good variable name. This is used to represent the mating pool
-        self.num_genes = j
+        self.num_genes = target
         self.sorted = (
             False  # Boolean to check if population is sorted with respect to fitness
         )
@@ -331,7 +331,7 @@ class Population:
             if not self.roulette_ready:
                 self.cal_div(sort=False)  # Calculating divergences
                 self.indexes = [v for v in range(len(self.individuals))]
-                self.p_mating.clear()
+                
                 v = 0.5
                 v_prime = self.fm * (
                     1 - v
@@ -342,12 +342,12 @@ class Population:
                     # TO DO: Check whether you have to use something else rather than self.fm for v_prime in this case.
                     # because when scaled, the fitnesses get higher than their initial ranges.
                     # When I initially checked this, nothing seemed unusual though
-                    df_scores = dot_product(
-                        self.scaled_fitnesses, self.divergences, v, v_prime
+                    df_scores = elem_wise_mult(
+                        self.scaled_fitnesses, softmax(self.divergences), v, v_prime
                     )
                 else:
-                    df_scores = dot_product(
-                        self.fitnesses, self.divergences, v, v_prime
+                    df_scores = elem_wise_mult(
+                        self.fitnesses, softmax(self.divergences), v, v_prime
                     )
                 if self.norm:
                     self.p_mating = normalize(df_scores)
@@ -542,15 +542,15 @@ class Population:
                         self.num_genes, self.m, self.n, self.k
                     )
                 )
-                # print("num_solutions: {}, m: {}, n: {},k: {}, scaled: {}, softmax: {} \n".format(self.num_genes,self.m,self.n,self.k, str(self.scale), str(not self.norm)))
+                #print("num_solutions: {}, m: {}, n: {},k: {}, scaled: {}, softmax: {} \n".format(self.num_genes,self.m,self.n,self.k, str(self.scale), str(not self.norm)))
                 logging.info(
                     "best index: {} , best_fitness: {}/{}, sizeofPop: {}\n".format(
                         self.bfi, self.best_fitness, self.fm, len(self.individuals)
                     )
                 )
-                # print("bfi: ",self.bfi, "best_fitness: "\
-                # ,self.best_fitness,"/", self.fm, "sizeofPop: ", len(self.individuals), "\n")
-                # assert self.individuals[self.bfi].fitness()[0] == self.best_fitness
+                #print("bfi: ",self.bfi, "best_fitness: "\
+                #,self.best_fitness,"/", self.fm, "sizeofPop: ", len(self.individuals), "\n")
+                #assert self.individuals[self.bfi].fitness()[0] == self.best_fitness
                 return False
                 #   divergences not updated at this point
         return False
@@ -562,9 +562,10 @@ class Population:
         If after self.m **2 * 1000 epochs the solution is not found, then it just returns the best individual at that generation.
         """
         found = self.initialize()  # Initialize individuals
-        self.fm = int(
-            self.num_genes * (self.num_genes - 1) / 2
-        )  # Maximum possible raw fitness
+        #self.fm = int(
+         #   self.num_genes * (self.num_genes - 1) / 2
+        #)  # Maximum possible raw fitness
+        self.fm = 1
         acc_gen = int(
             0.7 * self.eons
         )  # the epoch after which we want softmax() to be the main normalizing function.
@@ -630,3 +631,5 @@ class Population:
         plt.legend()
         plt.title("Population improvement over generations")
         plt.show()
+    def __repr__(self):
+        return f"Population(size={self.size}, target={self.num_genes}, m={self.m}, n={self.n}, k={self.k}, temp={self.temperature})"
