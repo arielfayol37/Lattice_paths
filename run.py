@@ -156,7 +156,7 @@ def parallel_search(target, m, n, k):
     config_index = (
         -1
     )  # Configuration index to be returned if none of the parallel searches finds the solution
-
+    recheck = True
     with ProcessPool() as executor:
         # Create a list of tasks
         tasks = []
@@ -168,13 +168,15 @@ def parallel_search(target, m, n, k):
             "population_" + str(target) + "_" + str(m) + "_" + str(n) + "_" + str(k)
         )
         print("Entering while loop")
-
+        tasks_done = []
         # Wait for the tasks to complete
         run = True
         while run:
             for i in range(len(tasks)):
                 if tasks[i].done():
-                    print("One task done")
+                    if i not in tasks_done:
+                        tasks_done.append(i)
+                        print(str(i), "th task done")
                     result = tasks[i].result()
                     shelfFile[population] = result
                     if result.fitnesses[result.bfi] == 9999:
@@ -186,43 +188,50 @@ def parallel_search(target, m, n, k):
                                 j
                             ].cancel()  # will return False if already completed, and will cancel and return True otherwise
                         break  # breaking out of for loop
-            time.sleep(target * 10)
+            if run != False:
+                #print("sleeping...")
+                time.sleep(target * 10)
 
             if tasks[-1].done():
                 print("Last task done")
                 # task[-1].done() may return True, while result has not yet been assigned. This may happen if the task
                 # gets completed while the program was sleeping.
-                try:
-                    print(
-                        type(result)
-                    )  # checking whether result has already been assigned. This will raise an error if result has not yet been
-                # assigned
-                except:
-                    result = tasks[
-                        0
-                    ].result()  # if result was not assigned, then none of the tasks found the solution.
-                # Don't put 'pass' here because it will create an error(bug) on the next line
-                if (
-                    result.fitnesses[result.bfi] != 9999
-                ):  # important because even if task[-1].done() returns True, it might return true just because
-                    # it was cancelled.
+                 
+                if recheck:
+                    recheck = False
+                else:
+                    try:
+                        print(
+                            type(result)
+                        )  # checking whether result has already been assigned. This will raise an error if result has not yet been
+                    # assigned
+                    except:
+                        print("getting the first population")
+                        result = tasks[
+                            0
+                        ].result()  # if result was not assigned, then none of the tasks found the solution.
+                    # Don't put 'pass' here because it will create an error(bug) on the next line
+                    if (
+                        result.fitnesses[result.bfi] != 9999
+                    ):  # important because even if task[-1].done() returns True, it might return true just because
+                        # it was cancelled.
 
-                    print("Merging populations")
-                    new_pop = tasks[0].result()  # the search() returns a Population
-                    for task in tasks[1:]:
-                        new_pop.individuals += task.result().individuals
-                        new_pop.fitnesses += task.result().fitnesses
-                        new_pop.max_size = 2000
-                        new_pop.av_pop_fitnesses.clear()
-                        new_pop.av_pop_divergences.clear()
-                        new_pop.roulette_ready = False
-                    print("Merged population evolving")
-                    new_best_individual = new_pop.evolve(
-                        mode="roulette", kill_mode="non_bias_random"
-                    )
-                    run = False  # To break out of the while loop
-                    result = new_pop
-                    shelfFile[population] = result
+                        print("Merging populations")
+                        new_pop = tasks[0].result()  # the search() returns a Population
+                        for task in tasks[1:]:
+                            new_pop.individuals += task.result().individuals
+                            new_pop.fitnesses += task.result().fitnesses
+                            new_pop.max_size = 2000
+                            new_pop.av_pop_fitnesses.clear()
+                            new_pop.av_pop_divergences.clear()
+                            new_pop.roulette_ready = False
+                        print("Merged population evolving")
+                        new_best_individual = new_pop.evolve(
+                            mode="roulette", kill_mode="non_bias_random"
+                        )
+                        run = False  # To break out of the while loop
+                        result = new_pop
+                        shelfFile[population] = result
 
     print("Done with all tasks")
     result.individuals[result.bfi].show(result.paths)
