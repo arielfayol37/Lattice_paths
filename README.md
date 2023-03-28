@@ -14,10 +14,13 @@ m by n lattice.***
 These paths can be denoted by several different notations.  For example,  a path in a 3 by 2 lattice is ENNEN or 001 010 110 211 220.  For the second form, the first two digits of each element represent the coordinates of the node while the third represents the move, so that 001 means ‘from coordinate (0,0), move East (1).’ 
 
 The choice of notation has implications for both narrative description of a path and the ease of coding the path, because the first facilitates human visualization, while the second facilitates computation by giving one and only one term for each edge. For example, the paths ENNNE and EENNN share only the first edge, but it is hard to tell just by looking at the sequence. Hence, using the first notation, comparing two paths means for every i-th edge in the paths (represented by an N or an E), we only know whether those two edges are the same by counting the number of Es or Ns before them. The second notation in contrast makes it very easy to compare two paths. For the very example given above, the second notation for the two paths would be 001 010 110 210 311 and 001 011 020 120 220 clearly showing that they only share the first edge.
+
 **k-distinct paths:**
 	Any two paths are said to be k-distinct if they share at most k-1 edges. Otherwise, they are considered k-equivalent.
+
 **Chromosome(Individual):**
 	A chromosome or individual is a set of genes(paths).
+
 **Solution:**
 	A chromosome which has genes that are all k-distinct to each other.
 
@@ -60,9 +63,10 @@ The mating probability of an individual is a probability that determines how lik
  **Crossover(mating):**
 When two parents are selected to mate, the new chromosome(individual) they produce is just a product of the exchange of genes of the parents. How does this exchange happen? Thinking about the chromosomes as a sequence of genes, a random point is selected along the sequence and the genes before that point will be taken from one parent, and the genes after it will be taken from the other parent. The combination of those will be the new individual. 
 
-       **d)	Crossover frequency:**
+**d)	Crossover frequency:**
 	How often crossover(mating) happens. Ranges from 0 percent to 100 percent, where 0 percent means the population of the next generation is just a copy of the current generation, while 100 percent means the population of the next generation will just be products of crossovers.
-       **e)  Mutation:**
+
+**e)  Mutation:**
 A chromosome has one of its genes randomly swapped for another in the set of all possible paths.
  
 **Mate Selection Process: Remainder Stochastic Sampling Without Replacement**
@@ -81,7 +85,8 @@ For the first child, the mutation is semi-random: only paths that are k-equivale
 	The third child has no mutation.
 
 
-**Refinements** 
+**Refinements**
+
 During evolution, the main problems the program might encounter to find the maximum solution are early convergence and low fitness variation. Convergence is when almost all the individuals in the population become similar, while low fitness variation occurs when the average fitness is close to the maximum fitness(optimal solution).
 
 **Early convergence:** at the start of the evolution, suppose an individual has a significantly higher fitness, though probably not the optimal solution. This will lead to an unusually high mating probability for that individual and will lead the population to converge towards this individual, since it mates more often and its offspring are likely to be him, with high but not optimal fitness.
@@ -89,6 +94,7 @@ During evolution, the main problems the program might encounter to find the maxi
 **Low fitness variation:** after many generations, the average population fitness increases and stagnates. The differences in individual fitnesses will be very small, even if there is a high divergence, thereby slowing down the improvement in the evolution towards the maximum fitness since no individual is particularly fitter than the others. 
 
 To address these problems, we introduce 
+
 **Linear fitness scaling.** So rather than using the raw fitness to calculate the mating probabilities, we scale them at every generation such that for the first generations, the maximum fitness is scaled to be just slightly above the average fitness and after many generations, it is scaled to be much higher than the average fitness. Also, we also want to ensure that the average scaled fitness of the population is the same as the average raw fitnesses. 
 
 Hence our scaling is of the form:
@@ -148,9 +154,11 @@ If 4) still does not find a perfect individual, then the maximum number of k-dis
 
 
 **Choice of initial values:**
+
 **a) Max population size, pm:**
 	The bigger the population size, the greater the diversity, but the evolution will take a longer time to find the solution. On the other hand, the smaller the population size, the less likely the algorithm will find the solution due to early convergence.
 Upon experimentation, population sizes of 500-1000 tend to work well.
+
 **b)Target, t:**
 Relying on the mathematical proofs and data collected from previous research by Gillman et Al, we don’t need to start the genetic algorithm with a value 1, before incrementing progressively. We just use the values from these previous research as our initial targets, then keep incrementing the target.
 	**c)The number of generations, g:**
