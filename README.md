@@ -2,7 +2,7 @@
 ***Genetic Algorithm
 To find the maximum number 
 Of k-distinct paths for an 
-m by n lattice by ARIEL FAYOL ATEUFACK ZEUDOM.***
+m by n lattice by  FAYOL ATEUFACK ZEUDOM.***
 
 ***ABSTRACT***
 
