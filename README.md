@@ -17,6 +17,13 @@ to efficiently find maximum sets of k-distinct lattice paths. Because it yields
 maximal sets, this approach has many potential applications, such as for the
 problems above, or for improving data transmission speed in networking
 
+Sequence.py is used to represent a path.
+Genome.py is used to represent a set of paths.
+Population.py is used to simulate the evolution of a group of Genomes.
+run.py is a wrapper used to collect the data.
+lp_utils.py is a module for useful utilities in the program.
+draw.py is used for visualization.
+
 # Definitions
 
 **The coordinates of corners of a lattice:**
