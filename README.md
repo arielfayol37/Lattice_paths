@@ -4,7 +4,18 @@ To find the maximum number
 Of k-distinct paths for an 
 m by n lattice.***
 
-Relevant in routing and scheduling problems.
+***ABSTRACT***
+
+Finding distinct paths on an m × n lattice is a useful mathematical method
+of modeling scheduling and routing problems. In particular, finding maximum
+sets of k-distinct lattice paths can contribute to finding optimal solutions to
+these problems. In previous work, Gillman et al conjectured that these sets
+could be found with a greedy algorithm. However, Engstrom & Yager showed
+that this was false using an inefficient brute force algorithm which becomes
+computationally expensive for large grids. Instead, we use a genetic algorithm
+to efficiently find maximum sets of k-distinct lattice paths. Because it yields
+maximal sets, this approach has many potential applications, such as for the
+problems above, or for improving data transmission speed in networking
 
 # Definitions
 
