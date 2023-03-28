@@ -22,7 +22,7 @@ Genome.py is used to represent a set of paths.
 Population.py is used to simulate the evolution of a group of Genomes.
 run.py is a wrapper used to collect the data.
 lp_utils.py is a module for useful utilities in the program.
-draw.py is used for visualization.
+drawing_paths.py is used for visualization.
 
 # Definitions
 
