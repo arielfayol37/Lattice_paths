@@ -4,6 +4,8 @@ To find the maximum number
 Of k-distinct paths for an 
 m by n lattice.***
 
+Relevant in routing and scheduling problems.
+
 # Definitions
 
 **The coordinates of corners of a lattice:**
