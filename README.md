@@ -177,7 +177,8 @@ Upon experimentation, population sizes of 500-1000 tend to work well.
 
 **b)Target, t:**
 Relying on the mathematical proofs and data collected from previous research by Gillman et Al, we don’t need to start the genetic algorithm with a value 1, before incrementing progressively. We just use the values from these previous research as our initial targets, then keep incrementing the target.
-	**c)The number of generations, g:**
+	
+**c)The number of generations, g:**
 	Upon experimentation, the number of generations needed to find the solution is a function of the dimensions of the lattice and the value of k. A function that works well is g = m * n * k * 700.
 
 *Alternatively, we could just make the program such that it stops if after a certain number of generations there is no improvement, it stops.*
