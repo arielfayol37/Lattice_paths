@@ -21,6 +21,7 @@ problems above, or for improving data transmission speed in networking
 
 **The coordinates of corners of a lattice:**
 	Given a lattice with m rows and n columns, the bottommost left corner has coordinates (0,0) and the topmost right corner has coordinates (m,n).
+
 **A path(gene):**
 	A path begins at (0,0) and ends at (m,n) and is restricted to East (1) or North (0) moves. Hence all the possible paths have the same length and there are C = n combinations of (m+n).   The set of all such paths is denoted {C}.
 
@@ -71,9 +72,11 @@ If nobody had a fitness of infinity at 6), then return (t-1) as the maximum numb
 **Divergence:**
 A measure of how different a chromosome(set of genes) is from the rest of the population.
 At each generation, the distribution of C(all the paths) over the population is calculated. For example, a path Pj from C, can be at maximum in all individuals, and at minimum in none. So a measure of how Pj is distributed in the population is the proportion of individuals that has the path. This is done for every path in C. Then the divergence of an individual is (1 - average of the distribution of its paths).
+
 **Mating Probability:**
 The mating probability of an individual is a probability that determines how likely an individual is going to be selected for mating. It is a function of the fitness and divergence of an individual.
- **Crossover(mating):**
+
+**Crossover(mating):**
 When two parents are selected to mate, the new chromosome(individual) they produce is just a product of the exchange of genes of the parents. How does this exchange happen? Thinking about the chromosomes as a sequence of genes, a random point is selected along the sequence and the genes before that point will be taken from one parent, and the genes after it will be taken from the other parent. The combination of those will be the new individual. 
 
 **d)	Crossover frequency:**
