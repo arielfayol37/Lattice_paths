@@ -1,11 +1,8 @@
 # python3 Population.py
 
 """ 
-    Genetic program for Maths Research:finding k-distinct paths for an m by n lattice, m>=n 
-    All the paths share the same length and are the shortest when leaving from the topmost left corner of the lattice to the bottommost right corner of the lattice.
-    All the edges are of length one unit. As such, each path is of length m+n units.
-    Two paths are said to be k-distinct if they share at most k-1 edges.
-    ****Solution to be found: So the aim of this program is to find the maximum number of k-distinct paths, given an m by n lattice and a parameter k***
+Implementation of Population class to simulate evolution and find solutions for particular 
+dimensions of lattice and k passed as argument.
 """
 from lp_utils import *
 from Genome import Genome
