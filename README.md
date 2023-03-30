@@ -59,7 +59,7 @@ A genetic algorithm starts with an initial generation and then uses an evolution
 **Evolution:**
 	Optimization process by which the program finds the solution by mating the population at each generation to produce new fitter individuals. The process is briefly summarized by the following algorithm.
 
-**Algorithm (Simple/Brief Overview):**
+#Algorithm (Simple/Brief Overview):
 We initialize the number of distinct paths(target) we are looking for, t, the initial size of the population, pi, the maximum size of the population, pm, the number of generations, g, dimensions of the lattice of the lattice m and n, and k. 
 
 Randomly generate pi individuals with each having t number of  paths. 
@@ -108,7 +108,7 @@ For the first child, the mutation is semi-random: only paths that are k-equivale
 	The third child has no mutation.
 
 
-**Refinements**
+#Refinements
 
 During evolution, the main problems the program might encounter to find the maximum solution are early convergence and low fitness variation. Convergence is when almost all the individuals in the population become similar, while low fitness variation occurs when the average fitness is close to the maximum fitness(optimal solution).
 
@@ -147,7 +147,7 @@ where u is a real number in the range [0,1].
 We chose u = 0.5, to give equal importance to the fitness and the divergence. 
 
 
-***Full Algorithm:***
+#Full Algorithm:
 
 We initialize the number of distinct paths we are looking for, t, the initial size of the population, pi, the maximum size of the population, pm, the number of generations, g, the speed, v, dimensions of the lattice of the lattice m and n, and k. 
 
