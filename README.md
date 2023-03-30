@@ -24,6 +24,9 @@ run.py is a wrapper used to collect the data.
 lp_utils.py is a module for useful utilities in the program.
 drawing_paths.py is used for visualization.
 
+#Sample Run:
+Open run.py and run the file. In order to attempt for example to find 7 paths for a 4 by 3 lattice with k = 3, that is that they share at most (k-1) edges, you can execute the line "search(size = 1000, target = 7, m = 4, n = 3, k = 3, visualize = True)" to initiate a search with a population size of 1000. It will take less than 3 seconds to find the solution, then display it on your screen. I bet you won't be ablleto find 7 paths that share at most 2 edges if you tried yourself. You could also run "parallel_search(target = 7, m = 4, n = 3, k = 3)" which will instead run multiple searches in parallel to maximize the probability of finding the solution.
+
 # Definitions
 
 **The coordinates of corners of a lattice:**
