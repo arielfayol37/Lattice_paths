@@ -24,7 +24,7 @@ run.py is a wrapper used to collect the data.
 lp_utils.py is a module for useful utilities in the program.
 drawing_paths.py is used for visualization.
 
-#Sample Run:
+# Sample Run:
 Open run.py and run the file. In order to attempt for example to find 7 paths for a 4 by 3 lattice with k = 3, that is that they share at most (k-1) edges, you can execute the line "search(size = 1000, target = 7, m = 4, n = 3, k = 3, visualize = True)" to initiate a search with a population size of 1000. It will take less than 3 seconds to find the solution, then display it on your screen. I bet you won't be ablleto find 7 paths that share at most 2 edges if you tried yourself. You could also run "parallel_search(target = 7, m = 4, n = 3, k = 3)" which will instead run multiple searches in parallel to maximize the probability of finding the solution.
 
 # Definitions
@@ -77,7 +77,7 @@ If nobody had a fitness of infinity at 6), then return (t-1) as the maximum numb
 
 
 
-**More precise definitions and description of the Algorithm**
+# More precise definitions and description of the Algorithm
 
 **Divergence:**
 A measure of how different a chromosome(set of genes) is from the rest of the population.
@@ -111,7 +111,7 @@ For the first child, the mutation is semi-random: only paths that are k-equivale
 	The third child has no mutation.
 
 
-#Refinements
+# Refinements
 
 During evolution, the main problems the program might encounter to find the maximum solution are early convergence and low fitness variation. Convergence is when almost all the individuals in the population become similar, while low fitness variation occurs when the average fitness is close to the maximum fitness(optimal solution).
 
@@ -169,7 +169,7 @@ If nobody had a fitness of infinity at 9), then return s as the maximum number o
 
 
 
-**Exploiting Multiple Cores:**
+# Exploiting Multiple Cores:
 	Due to the random nature of this search, we go further by implementing the above algorithm on different cores(ecosystems). Using smaller values for v like 3 makes the process explore more of the search space, but might take too much time to find the solution. Hence, we can use different cores to simulate different ecosystems with different values of v. As such, the ecosystems with higher values of v can find the solution quickly if it is an easy one and those with smaller values of v will explore more if it is a difficult solution. 
 	So we create 5 different populations with different sizes and final temperatures, then run them in parallel.
 Create 5 different populations with different sizes and values of v.
