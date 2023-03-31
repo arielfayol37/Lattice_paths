@@ -6,7 +6,7 @@ m by n lattice by  FAYOL ATEUFACK ZEUDOM.***
 
 ***ABSTRACT***
 
-Enhancing the efficiency of distinct path identification on an m × n lattice is a valuable approach to optimize scheduling, routing, and data transmission speed in networking applications. Specifically, determining the maximum sets of k-distinct lattice paths can facilitate the discovery of ideal solutions to these challenges. In prior research, Gillman et al. postulated that a greedy algorithm could be employed to uncover these sets. However, Engstrom & Yager disproved this hypothesis using a computationally expensive brute force algorithm, which may require years of processing for larger lattices. To address this limitation, our study employs a genetic algorithm to effectively identify the maximum sets of k-distinct lattice paths. Moreover, as genetic algorithms are versatile optimization tools, our findings can serve as a practical blueprint for various optimization problems.
+This research employs a genetic algorithm to efficiently identify maximum sets of k-distinct lattice paths, which can be used in optimizing solutions for scheduling problems, routing problems, and data transmission in network systems. Building upon the previous work by Gillman et al., our method overcomes the computational limitations of traditional brute-force techniques, providing a more effective approach. The adaptability and potential of our methodology in tackling various optimization problems make it a valuable foundation for future research and applications.
 
 Sequence.py is used to represent a path.
 Genome.py is used to represent a set of paths.
