@@ -1,5 +1,5 @@
 # python3 Genome.py
-from lp_utils import translate
+from lp_utils import translate, generate_all_paths
 import random
 from drawing_paths import draw_path, draw_lattice
 
@@ -225,12 +225,13 @@ class Genome:
         """
         Method to visualize the lattice and paths.
         """
+        paths = generate_all_paths(self.m, self.n)
         draw_lattice(self.m, self.n)
         o = 40 / self.num_sequences
         i = -0.5 * self.num_sequences
-        for seq in range(len(self.sequences)):
+        for j in range(len(self.sequences)):
             draw_path(
-                translate(self.sequences[seq], "to_A"), self.m, self.n, o * i, seq
+                translate(paths[self.sequences[j]], "to_A"), self.m, self.n, o * i, j
             )
             i += 1
     def __repr__(self):
