@@ -1,22 +1,16 @@
- 
-import ctypes, turtle, random
-user32 = ctypes.windll.user32
-x_size, y_size = user32.GetSystemMetrics(0),user32.GetSystemMetrics(1)
- 
-  
-#sc=turtle.Screen()
-#s=turtle.Turtle()
-#trtl.up
-#x_or =-0.5*x_size+200
-#y_or = -y_size*0.5+200
-#s.penup()
-#s.setposition(x_or, y_or)
-#s.pendown()
-# method to draw y-axis lines
-colors = [ (60, 180, 75), (255, 225, 25),  (245, 130, 48),(170, 110, 40), \
- (70, 240, 240),(145, 30, 180),  (128, 128, 128), (240, 50, 230), (210, 245, 60),(0, 130, 200), (250, 190, 212), (0, 128, 128),\
- (220, 190, 255),  (255, 250, 200), (128, 0, 0), (170, 255, 195), (230, 25, 75),(128, 128, 0),\
-  (255, 215, 180), (0, 0, 128)]
+import turtle, random
+
+# Getting the screen size
+canvas = turtle.Screen()
+x_size = canvas.window_width()
+y_size = canvas.window_height()
+
+# Your color list
+colors = [(60, 180, 75), (255, 225, 25), (245, 130, 48),(170, 110, 40), 
+    (70, 240, 240),(145, 30, 180), (128, 128, 128), (240, 50, 230), 
+    (210, 245, 60),(0, 130, 200), (250, 190, 212), (0, 128, 128),
+    (220, 190, 255), (255, 250, 200), (128, 0, 0), (170, 255, 195), 
+    (230, 25, 75),(128, 128, 0), (255, 215, 180), (0, 0, 128)]
 def drawy(x_forward,x_or, y_or, s):
 	
 	# line
