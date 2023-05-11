@@ -1,4 +1,23 @@
 
+
+# Sample Run:
+**Some modules you need to install on your own computer: **
+pebble, openpyxl, pickle, and numpy 
+
+***Application***
+
+You can optimized many processes using a Genetic Algorithm. For this program in particular, you can use it in graph theory or almost anything that deals with paths in lattice. For example in circuit design, you could can define one point of a circuit as a start point, and another as an end point. For this particular code, the definition of a path may not fit you but can easily change it to your convenience, as well as the fitness function.
+
+Open run.py and run the file. In order to attempt for example to find 7 paths for a 4 by 3 lattice with k = 3, that is that they share at most (k-1) edges, you can execute the line "search(size = 1000, target = 7, m = 4, n = 3, k = 3, visualize = True)" to initiate a search with a population size of 1000. It will take less than 3 seconds to find the solution, then display it on your screen. I bet you won't be ablleto find 7 paths that share at most 2 edges if you tried yourself. You could also run "parallel_search(target = 7, m = 4, n = 3, k = 3)" which will instead run multiple searches in parallel to maximize the probability of finding the solution.
+
+
+Sequence.py is used to represent a path.
+Genome.py is used to represent a set of paths.
+Population.py is used to simulate the evolution of a group of Genomes.
+run.py is a wrapper used to collect the data.
+lp_utils.py is a module for useful utilities in the program.
+drawing_paths.py is used for visualization.
+
 ***Genetic Algorithm
 To find the maximum number 
 Of k-distinct paths for an 
@@ -8,19 +27,7 @@ m by n lattice by  FAYOL ATEUFACK ZEUDOM.***
 
 This research employs a genetic algorithm to efficiently identify maximum sets of k-distinct lattice paths, which can be used in optimizing solutions for scheduling problems, routing problems, and data transmission in network systems. Building upon the previous work by Gillman et al., our method overcomes the computational limitations of traditional brute-force techniques, providing a more effective approach. The adaptability and potential of our methodology in tackling various optimization problems make it a valuable foundation for future research and applications.
 
-Sequence.py is used to represent a path.
-Genome.py is used to represent a set of paths.
-Population.py is used to simulate the evolution of a group of Genomes.
-run.py is a wrapper used to collect the data.
-lp_utils.py is a module for useful utilities in the program.
-drawing_paths.py is used for visualization.
 
-# Sample Run:
-***Application***
-
-You can optimized many processes using a Genetic Algorithm. For this program in particular, you can use it in graph theory or almost anything that deals with paths in lattice. For example in circuit design, you could can define one point of a circuit as a start point, and another as an end point. For this particular program, the definition of a path may not fit you but can easily change it to your convenience, as well as the fitness function.
-
-Open run.py and run the file. In order to attempt for example to find 7 paths for a 4 by 3 lattice with k = 3, that is that they share at most (k-1) edges, you can execute the line "search(size = 1000, target = 7, m = 4, n = 3, k = 3, visualize = True)" to initiate a search with a population size of 1000. It will take less than 3 seconds to find the solution, then display it on your screen. I bet you won't be ablleto find 7 paths that share at most 2 edges if you tried yourself. You could also run "parallel_search(target = 7, m = 4, n = 3, k = 3)" which will instead run multiple searches in parallel to maximize the probability of finding the solution.
 
 # Definitions
 
