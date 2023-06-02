@@ -55,9 +55,9 @@ def collect_data_genetic(m, n):
                 target = wb1["Sheet"].cell(i + 1, k + 1).value
             else:
                 target = wb2["Sheet"].cell(i + 1, k + 1).value
-            print("Starting parallel search...")
+            print("Starting parallel search for target = {target} m = {i}, n = {n}, and k = {k}...")
             run, ci = parallel_search(target=target, m=i, n=n, k=k)
-            print(f"Done parallel search for m = {i}, n = {n}, and k = {k}")
+            print(f"Done parallel search for target = {target} m = {i}, n = {n}, and k = {k}")
             try:  # Might raise an error if the cell does not have a value yet
                 if int(wb["Sheet"].cell(i + 1, k + 1).value) < target:
                     wb["Sheet"].cell(i + 1, k + 1).value = target
@@ -69,7 +69,9 @@ def collect_data_genetic(m, n):
             ):  # Keeps incrementing the target and stops only if it didn't find any solution.
                 config_indexes.append(ci)
                 target += 1
+                print("Starting parallel search for target = {target} m = {i}, n = {n}, and k = {k}...")
                 run, ci = parallel_search(target=target, m=i, n=n, k=k)
+                print(f"Done parallel search for target = {target} m = {i}, n = {n}, and k = {k}")
             try:
                 if int(wb["Sheet"].cell(i + 1, k + 1).value) < target-1:# must be minus one here because run returned False
                     # in the while loop above, meaning solution not found
@@ -174,7 +176,7 @@ def parallel_search(target, m, n, k):
             "n": n,
             "k": k,
             "kill_mode": "non_bias_random",
-            "temp": 3,
+            "temp": 7,
         },
         {
             "size": 10000,
@@ -191,7 +193,7 @@ def parallel_search(target, m, n, k):
     config_index = (
         -1
     )  # Configuration index to be returned if none of the parallel searches finds the solution
-    recheck = True
+    recheck = True # To solve a the problem in if taks[-1].done()
     with ProcessPool() as executor:
         # Create a list of tasks
         tasks = []
@@ -212,37 +214,43 @@ def parallel_search(target, m, n, k):
                     if i not in tasks_done:
                         tasks_done.append(i)
                         print(str(i), "th task done")
-                    result = tasks[i].result()
-                    if not previous_population_saved(target, m, n, k):
-                        shelfFile[population] = result
-                        save_object(result, population)
-                    if result.fitnesses[result.bfi] == 9999:
-                        print("Perfect individual found")
-                        run = False
-                        config_index = i
-                        for j in range(len(tasks)):
-                            c = tasks[
-                                j
-                            ].cancel()  # will return False if already completed, and will cancel and return True otherwise
-                        break  # breaking out of for loop
+                        result = tasks[i].result()
+                        
+                        if result.fitnesses[result.bfi] == 9999:
+                            print("Perfect individual found")
+                            shelfFile[population] = result
+                            save_object(result, population)
+                            run = False
+                            config_index = i
+                            for j in range(len(tasks)):
+                                c = tasks[
+                                    j
+                                ].cancel()  # will return False if already completed, and will cancel and return True otherwise
+                            break  # breaking out of for loop
             if run != False:
                 #print("sleeping...")
                 time.sleep(target * 10)
 
             if tasks[-1].done():
-                print("Last task done")
+                
                 # task[-1].done() may return True, while result has not yet been assigned. This may happen if the task
                 # gets completed while the program was sleeping.
+                # Problem solved using recheck
                  
                 if recheck:
                     recheck = False
+                    continue # This is actually useless, but just in case we do further modifications and forget that we 
+                # have to recheck and not assign False to run
+                
                 else:
+                    
                     try:
                         print(
                             type(result)
                         )  # checking whether result has already been assigned. This will raise an error if result has not yet been
                     # assigned
                     except:
+                        print("Last task done, no perfect individual found. Will merge populations")
                         print("getting the first population")
                         result = tasks[
                             0
@@ -533,10 +541,27 @@ def read_object(filename, showBestIndividual=True, showTranslated=True):
             print("".join(list_path))
     return obj
 
-if __name__ == '__main__':
-    #collect_data_greedy(2,2)
-    collect_data_genetic(3,3)
+#if __name__ == '__main__':
+    # Run this only if greedy data is already collected
+    # collect_data_genetic(3,3)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Unused functions. Just during development
 
 """
 def nbrr(non_bias_random_times):
