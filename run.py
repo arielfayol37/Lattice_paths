@@ -522,10 +522,10 @@ def save_object(obj, filename):
     # Text file to save the individuals
     text_file = filename + ".txt"
     with open(text_file, "a") as file:
-        text_file.write("\n " + filename + "\n")
+        file.write("\n " + filename + "\n")
         for alphabet_path in obj.individuals[obj.bfi].translate(obj.paths):
-            text_file.write("".join(alphabet_path) + '\n')
-        text_file.write("\n\n\n")
+            file.write("".join(alphabet_path) + '\n')
+        file.write("\n\n\n")
     
 # Creating/Opening an excel file to store the best configs when doing paralell
 # search, again just in case shelve does not work
