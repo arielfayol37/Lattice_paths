@@ -8,9 +8,7 @@ from Sequence import Sequence
 from lp_utils import generate_all_paths
 from pebble import ProcessPool
 
-def save_object(obj, filename):
-    with open(filename, 'wb') as outp:  # Overwrites any existing file.
-        pickle.dump(obj, outp, pickle.HIGHEST_PROTOCOL)
+
 try:
     wb_config = openpyxl.load_workbook("successfull_configurations.xlsx")
 except:
@@ -73,10 +71,11 @@ def collect_data_genetic(m, n):
                 target += 1
                 run, ci = parallel_search(target=target, m=i, n=n, k=k)
             try:
-                if int(wb["Sheet"].cell(i + 1, k + 1).value) < target-1:# must be minus one here
+                if int(wb["Sheet"].cell(i + 1, k + 1).value) < target-1:# must be minus one here because run returned False
+                    # in the while loop above, meaning solution not found
                     wb["Sheet"].cell(i + 1, k + 1).value = target-1
             except:
-                wb["Sheet"].cell(i + 1, k + 1).value = target-1
+                wb["Sheet"].cell(i + 1, k + 1).value = target-1 # in case excel cell is empty
             wb.save(filename)
             shelfFile[
                 "list_of_configs"
@@ -124,6 +123,21 @@ def search(
         world.visualize_evolution()
     return world
 
+def previous_population_saved(target, m, n, k):
+    """
+    Used to avoid overwrites in parallel_search()
+    """
+    try:
+        filename = "lattice_table_genetic_" + str(n) + ".xlsx"
+        wb = openpyxl.load_workbook(
+            filename
+        ) 
+        if int(wb["Sheet"].cell(m + 1, k + 1).value) >= target:# must be minus one here
+            return True # Do not save
+        else:
+            return False # Can save
+    except:
+        return False # Empty excel cell, meaning nothing was saved before    
 
 def parallel_search(target, m, n, k):
     """
@@ -199,8 +213,9 @@ def parallel_search(target, m, n, k):
                         tasks_done.append(i)
                         print(str(i), "th task done")
                     result = tasks[i].result()
-                    shelfFile[population] = result
-                    save_object(result, population)
+                    if not previous_population_saved(target, m, n, k):
+                        shelfFile[population] = result
+                        save_object(result, population)
                     if result.fitnesses[result.bfi] == 9999:
                         print("Perfect individual found")
                         run = False
@@ -253,8 +268,9 @@ def parallel_search(target, m, n, k):
                         )
                         run = False  # To break out of the while loop
                         result = new_pop
-                        shelfFile[population] = result
-                        save_object(result, population)
+                        if not previous_population_saved(target, m, n, k):
+                            shelfFile[population] = result
+                            save_object(result, population)
 
     print("Done with all tasks")
     result.individuals[result.bfi].show(result.paths)
@@ -472,8 +488,37 @@ def test(
         world.visualize_evolution()
     return
 
+def save_object(obj, filename):
+    """
+    Function to save the populations in a pickle file, since shelve may
+    not work on certain computers
+    """
+    with open(filename, 'wb') as outp:  # Overwrites any existing file.
+        pickle.dump(obj, outp, pickle.HIGHEST_PROTOCOL)
+    # Text file to save the individuals
+    text_file = filename + ".txt"
+    with open(text_file, "a") as file:
+        text_file.write("\n " + filename + "\n")
+        for alphabet_path in obj.individuals[obj.bfi].translate(obj.paths):
+            text_file.write("".join(alphabet_path) + '\n')
+        text_file.write("\n\n\n")
+    
+# Creating/Opening an excel file to store the best configs when doing paralell
+# search, again just in case shelve does not work
+
+def read_object(filename, showBestIndividual=True, showTranslated=True):
+    # Example file name == "population_5_4_2_3"
+    with open(filename, "rb") as file:
+        obj = pickle.load(file)
+    if showBestIndividual and isinstance(obj, Population): # In case the object is a population
+        obj.individuals[obj.bfi].show(obj.paths)
+    if showTranslated:
+        for list_path in obj.individuals[obj.bfi].translate(obj.paths):
+            print("".join(list_path))
+    return obj
+
 if __name__ == '__main__':
-    collect_data_greedy(2,2)
+    #collect_data_greedy(2,2)
     collect_data_genetic(2,2)
 
 

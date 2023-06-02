@@ -4,7 +4,7 @@ from decimal import *
 import numpy as np 
 
 
-def translate(patA,to_lan):
+def translate(patA,to_lan,paths=None):
     """
   Function to translate from the different fromats represent the paths.
   to_lan takes either 'to_O' as argument to translate paths of the form EE..NEN.. to the form
@@ -41,8 +41,9 @@ def translate(patA,to_lan):
                     
         return patO
     elif to_lan == "to_A":
-        patO = []
-        for term in patA:
+        assert paths is not None, "must pass the paths as argument"
+        patO = []        
+        for term in paths[patA]:
             patO.append(term[2])
         return patO
        

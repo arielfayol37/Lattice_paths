@@ -1,7 +1,7 @@
 # python3 Genome.py
 from lp_utils import translate, generate_all_paths
 import random
-from drawing_paths import draw_path, draw_lattice
+#from drawing_paths import draw_path, draw_lattice
 
 
 class Genome:
@@ -33,6 +33,7 @@ class Genome:
             i for i in range(len_paths)
         ]  # list of all paths(indices actually)
         # self.poison()
+        self.translated = None # To store the paths in human readable form
         self._generate_sequences(paths, len_paths, empty)
 
     def _generate_sequences(self, paths, len_paths, empty):
@@ -210,21 +211,25 @@ class Genome:
 
         return
 
-    def translate(self):
+    def translate(self, paths):
         """
         Method to translate path from the 3-digit term format to the Alphabetical format(EN...EEN).
         """
-
+        itoc = {0:"E",1:"N"}
         translated = []
         for sequence in self.sequences:
-            translated.append(translate(sequence, "to_A"))
-
+            translated.append(translate(sequence, "to_A", paths))
+        for index,list_of_terms in enumerate(translated):
+            for index2, term in enumerate(list_of_terms):
+                translated[index][index2] = itoc[term]
+        self.translated = translated
         return translated
 
     def draw(self):
         """
         Method to visualize the lattice and paths.
         """
+        from drawing_paths import draw_path, draw_lattice
         paths = generate_all_paths(self.m, self.n)
         draw_lattice(self.m, self.n)
         o = 40 / self.num_sequences
