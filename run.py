@@ -522,7 +522,11 @@ def save_object(obj, filename):
     # Text file to save the individuals
     text_file = filename + ".txt"
     with open(text_file, "a") as file:
-        file.write("\n " + filename + "\n")
+        if obj.bestIsPerfect:
+            file.write("\n\n\n Perfect solution" + filename + ":population_numDistinctPaths_m_n_k \n")
+        else:
+            file.write(f"\n\n\n Not a perfect solution, best fitness: {obj.best_fitness}"\
+                        + filename + ":population_numDistinctPaths_m_n_k \n")    
         for alphabet_path in obj.individuals[obj.bfi].translate(obj.paths):
             file.write("".join(alphabet_path) + '\n')
         file.write("\n\n\n")

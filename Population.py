@@ -97,7 +97,7 @@ class Population:
         self.distribution = (
             dict()
         )  # Used to store the paths indices as keys and the number of individuals who contain those paths as values
-
+        self.bestIsPerfect = None; # Used in run.py file in order to save best individuals
     def compute_equivalences(self):
         """ "
         Compute the equivalent paths to every path and store then in the self.equivalences dictionary such that
@@ -524,6 +524,7 @@ class Population:
                         )
 
             if self.best_fitness == 9999:
+                self.bestIsPerfect = True
                 assert (
                     self.individuals[self.bfi].fitness(self.equivalences, False) == 9999
                 )
