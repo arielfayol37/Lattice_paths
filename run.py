@@ -15,9 +15,6 @@ try:
     wb_config = openpyxl.load_workbook("successfull_configurations.xlsx")
 except:
     wb_config = openpyxl.Workbook()
-sheet_config = wb_config.active
-next_row = sheet_config.max_row + 1
-sheet_config.cell(next_row, 1).value = "Successful Configurations"
 wb_config.save("successfull_configurations.xlsx")
 wb_config.close()
 
@@ -85,6 +82,7 @@ def collect_data_genetic(m, n):
                 "list_of_configs"
             ] = config_indexes  # Store the config indices in a shelf file
             for config in config_indexes:
+                sheet_config = wb_config.active
                 next_row = sheet_config.max_row + 1
                 sheet_config.cell(next_row, 1).value = config
     wb_config.save("successfull_configurations.xlsx")
