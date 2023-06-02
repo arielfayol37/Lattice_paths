@@ -401,10 +401,19 @@ def collect_data_greedy(m, n):
         wb2 = openpyxl.load_workbook(filename2)
     except:
         wb2 = openpyxl.Workbook()
+    filename3 = (
+        "lattice_table_simple_greedy" + str(n) + ".xlsx"
+    )  # spreadsheet name for running the greedy algorithm in lexicographical order
+    try:
+        wb3 = openpyxl.load_workbook(filename3)
+    except:
+        wb3 = openpyxl.Workbook()    
     sheet1 = wb1["Sheet"]
     sheet1.cell(1, 1).value = "m/k"
     sheet2 = wb2["Sheet"]
     sheet2.cell(1, 1).value = "m/k"
+    sheet3 = wb2["Sheet"]
+    sheet3.cell(1, 1).value = "m/k"
 
     for i in range(m, 12):
         paths = generate_all_paths(i, n)
@@ -434,8 +443,15 @@ def collect_data_greedy(m, n):
             sheet2.cell(i + 1 + 15, 2 * k + 1).value = max_indexes2[0]
             sheet2.cell(i + 1 + 15, 2 * k + 2).value = max_indexes2[1]
 
+
             wb2.save(filename2)
 
+            sheet3.cell(1, k + 1).value = str(k)
+            sheet3.cell(i + 1, 1).value = str(i)
+            sheet3.cell(i + 1, k + 1).value = greedy(i,n,k,paths,reverse=False)
+
+            wb3.save(filename3)
+            
 
 # The next functions were used during the development of the program
 # but aren't used anymore. However, I kept them here just in case.
