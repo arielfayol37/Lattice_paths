@@ -512,14 +512,14 @@ def save_object(obj, filename):
         if obj.bestIsPerfect:
             file.write("\n\n\n Perfect solution " + filename + ": population_numDistinctPaths_m_n_k \n")
         else:
-            file.write(f"\n\n\n Not a perfect solution, best fitness: {obj.best_fitness}"\
-                        + filename + ":population_numDistinctPaths_m_n_k \n")
+            file.write(f"\n\n\n Not a perfect solution, best fitness: {obj.best_fitness}\
+                        {filename} :population_numDistinctPaths_m_n_k \n")
         paths = []   
         for alphabet_path in obj.individuals[obj.bfi].translate(obj.paths):
             paths.append("".join(alphabet_path))
         paths.sort()
-        for path in paths:
-            file.write( + '\n')
+        for index, path in enumerate(paths):
+            file.write(path + "   " + str(obj.individuals[obj.bfi].sequences[index])+ '\n')
         file.write("\n\n\n")
     
 # Creating/Opening an excel file to store the best configs when doing paralell
