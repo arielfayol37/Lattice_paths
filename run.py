@@ -519,7 +519,7 @@ def read_object(filename, showBestIndividual=True, showTranslated=True):
 
 if __name__ == '__main__':
     #collect_data_greedy(2,2)
-    collect_data_genetic(2,2)
+    collect_data_genetic(3,3)
 
 
 """
