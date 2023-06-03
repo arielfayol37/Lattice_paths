@@ -7,6 +7,7 @@ from Population import Population
 from Sequence import Sequence
 from lp_utils import generate_all_paths
 from pebble import ProcessPool
+from Genome import Genome
 
 
 
@@ -22,7 +23,7 @@ def collect_data_genetic(m, n):
         "lattice_table_greedy_double_slicing_loo" + str(n) + ".xlsx"
     )
     filename = "lattice_table_genetic_" + str(n) + ".xlsx"
-    config_indexes = (
+    config_indices = (
         []
     )  # To store the configuration indices of the genetic algorithm that returns the solution the quickest.
     shelfFile = shelve.open("evolution_config")
@@ -45,7 +46,7 @@ def collect_data_genetic(m, n):
                 target = wb1["Sheet"].cell(i + 1, k + 1).value
             else:
                 target = wb2["Sheet"].cell(i + 1, k + 1).value
-            print("Starting parallel search for target = {target} m = {i}, n = {n}, and k = {k}...")
+            print(f"Starting parallel search for target = {target} m = {i}, n = {n}, and k = {k}...")
             run, ci = parallel_search(target=target, m=i, n=n, k=k)
             print(f"Done parallel search for target = {target} m = {i}, n = {n}, and k = {k}")
             try:  # Might raise an error if the cell does not have a value yet
@@ -57,9 +58,9 @@ def collect_data_genetic(m, n):
             while (
                 run
             ):  # Keeps incrementing the target and stops only if it didn't find any solution.
-                config_indexes.append(ci)
+                config_indices.append(ci)
                 target += 1
-                print("Starting parallel search for target = {target} m = {i}, n = {n}, and k = {k}...")
+                print(f"Starting parallel search for target = {target} m = {i}, n = {n}, and k = {k}...")
                 run, ci = parallel_search(target=target, m=i, n=n, k=k)
                 print(f"Done parallel search for target = {target} m = {i}, n = {n}, and k = {k}")
             try:
@@ -71,9 +72,9 @@ def collect_data_genetic(m, n):
             wb.save(filename)
             shelfFile[
                 "list_of_configs"
-            ] = config_indexes  # Store the config indices in a shelf file
-            for config in config_indexes:
-                save_config_in_txt_file(config)
+            ] = config_indices  # Store the config indices in a shelf file
+            for config in config_indices:
+                save_config_in_txt_file(config,target,m,n,k)
     
     wb.close()
     wb1.close()
@@ -278,7 +279,7 @@ def parallel_search(target, m, n, k):
         return (False, config_index)
 
 
-def greedy(m, n, k, pats, reverse=True):
+def greedy(m, n, k, pats, reverse=True, return_solution = False, pop_out_indices = []):
     """
     Greedy algorithm: Takes a set of paths 'pats' for an m by n lattice. Then creates another set G.
     Reverse: if False, it goes through every path in pats and checks wheter the path is k-distinct from
@@ -287,25 +288,40 @@ def greedy(m, n, k, pats, reverse=True):
     Returns the size of G (the number of paths in G)
     """
     sol = []  # The set G
+    solutions_indices = [] # Watch out here because some paths are sometimes pop out before the list
+                            # of paths is passed as argument
     if not reverse:
         l = Sequence(m, n, empty=True)
-        l.terms = pats[0]
+        si = 0 # start index
+        while si in pop_out_indices: # implemented this just in case we wanted to quickly run the
+                                     # greedy algorithm without some paths
+            si += 1
+        l.terms = pats[si]
         sol.append(l)
-
-        for pat in pats[1:]:
+        solutions_indices.append(si)
+        for index,pat in enumerate(pats[:]):
+            if index in pop_out_indices:
+                continue
             s = Sequence(m, n, empty=True)
             s.terms = pat
+            
             for i in range(len(sol)):
                 if s.compare(sol[i], k) == 0:
                     break
                 if i == len(sol) - 1:
                     sol.append(s)
+                    solutions_indices.append(index)
     else:
         l = Sequence(m, n, empty=True)
-        l.terms = pats[-1]
+        si = len(pats)-1
+        while si in pop_out_indices:
+            si -= 1
+        l.terms = pats[si]
         sol.append(l)
-
+        solutions_indices.append(si)
         for j in range(len(pats) - 1, -1, -1):
+            if j in pop_out_indices:
+                continue
             s = Sequence(m, n, empty=True)
             s.terms = pats[j]
             for i in range(len(sol)):
@@ -313,9 +329,11 @@ def greedy(m, n, k, pats, reverse=True):
                     break
                 if i == len(sol) - 1:
                     sol.append(s)
-
-    return len(sol)
-
+                    solutions_indices.append(j) 
+    if return_solution:
+        return (len(sol), solutions_indices)
+    else:
+        return len(sol)
 
 
 def greedy_t(m, n, k, paths, reverse):
@@ -329,7 +347,7 @@ def greedy_t(m, n, k, paths, reverse):
     pati = (
         paths.copy()
     )  # We use copy here because we don't want pati and paths to have the same reference
-    max_indexes = (
+    max_indices = (
         -2,
         -2,
     )  # This stores the indices of the paths we removed that returned the greatest result from greedy()
@@ -349,18 +367,47 @@ def greedy_t(m, n, k, paths, reverse):
             if amax > max:
                 max = amax
                 if j >= i:
-                    max_indexes = (i, j + 1)
+                    max_indices = (i, j + 1)
                 else:
-                    max_indexes = (i, j)
+                    max_indices = (i, j)
             solutions.append(max)
 
         assert len(patos) == len(paths) - 1
         pmax = greedy(m, n, k, patos, reverse)
+        # Very important that the following comes last.
+        # Otherwise we would think popping out two paths is necessary,
+        # whereas only one was enough
         if pmax > max:
             max = pmax
-            max_indexes = (i, -1)
+            max_indices = (i, -1) # if popping only one path was enough
         solutions.append(pmax)
-    return (solutions, max_indexes)
+    if max_indices[1] == -2:
+        foo, solution_indices = greedy(m,n,k, paths.copy(), reverse, return_solution= True)
+    elif max_indices[1] == -1:
+        patos = paths.copy()
+        patos.pop(max_indices[0])
+        foo, solution_indices = greedy(m,n,k,patos,reverse, return_solution=True)
+    else:
+        patos = paths.copy()
+        patos.pop(max_indices[0])
+        if (max_indices[1]) < max_indices[0]:
+            patos.pop(max_indices[1])
+        elif (max_indices[1] - 1) >= max_indices[0]:
+            patos.pop(max_indices[1] - 1)
+        foo, solution_indices = greedy(m,n,k,patos,reverse, return_solution=True)
+    # print(solution_indices)
+    g = Genome(num_sequences=len(solution_indices), m = m, n = n, k = k, paths=None, len_paths=len(paths), empty=True)
+    g.sequences = solution_indices
+    pathsii = list(map(lambda alphabet_path:"".join(alphabet_path), g.translate(paths)))
+    filename_start = "simple_" if max_indices[1] < 0 else "improved_"
+    filename_start += "reversed" if reverse else "normal_order"   
+    filename = f"{filename_start}_greedy_solution_{len(solution_indices)}_{m}_{n}_{k}.txt"
+    with open(filename, "a") as file:
+        file.write(filename + " equivalent to greedyAlgorithmType_target_m_n_k.txt\n")
+        for index, path in enumerate(pathsii):
+            file.write(path + " " + str(solution_indices[index]) + '\n')
+        file.write("\n\n\n")
+    return (solutions, max_indices)
 
 
 def find_max(alist):
@@ -407,11 +454,12 @@ def collect_data_greedy(m, n):
     sheet1.cell(1, 1).value = "m/k"
     sheet2 = wb2["Sheet"]
     sheet2.cell(1, 1).value = "m/k"
-    sheet3 = wb2["Sheet"]
+    sheet3 = wb3["Sheet"]
     sheet3.cell(1, 1).value = "m/k"
 
     for i in range(m, 12):
-        paths = generate_all_paths(i, n)
+        paths = generate_all_paths(i, n) # This seems kinda stupid because the paths are generated from the arguments
+        # of greedy() itself but the issue is that we sometimes want to pop some paths
 
         for k in range(3, i + n - 1):
             sheet1.cell(1, k + 1).value = str(k)
@@ -536,13 +584,19 @@ def read_object(filename, showBestIndividual=True, showTranslated=True):
             print("".join(list_path))
     return obj
 
-def save_config_in_txt_file(config_integer, filename ="successful_config.txt"):
+def save_config_in_txt_file(config_integer, target, m, n, k,filename ="successful_config.txt"):
     with open(filename, "a") as file:
-        file.write(f"{config_integer}\n")
-#if __name__ == '__main__':
+        file.write(f"{config_integer=} {target=} {m=} {n=} {k=} \n")
+        
+"""      
+if __name__ == '__main__':
     # Run this only if greedy data is already collected
-    # collect_data_genetic(3,3)
-
+    collect_data_greedy(3,3)
+    collect_data_genetic(3,3)
+    for i in [4,5,6]:
+        collect_data_greedy(i,i)
+        collect_data_genetic(i,i)
+"""  
 
 
 
