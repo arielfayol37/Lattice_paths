@@ -588,15 +588,20 @@ def save_config_in_txt_file(config_integer, target, m, n, k,filename ="successfu
     with open(filename, "a") as file:
         file.write(f"{config_integer=} {target=} {m=} {n=} {k=} \n")
         
-"""      
+      
 if __name__ == '__main__':
-    # Run this only if greedy data is already collected
-    collect_data_greedy(3,3)
-    collect_data_genetic(3,3)
-    for i in [4,5,6]:
+    # The core function of this data collection is parallel_search()
+    # Note that parallel_search takes target,m,n, and k as arguments, hence
+    # it is independent of the table we are trying to fill. It just needs the 
+    # dimensions of the lattice and k
+
+    # Hence, you can make this data collection way quicker if you ran the rows or individual entries(even better)
+    # of the tables we are trying to generate by running parallel_search() in parallel with different arguments(the dimension
+    # of the entry)
+    for i in [2,3,4,5,6]:
         collect_data_greedy(i,i)
         collect_data_genetic(i,i)
-"""  
+
 
 
 
