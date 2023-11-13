@@ -528,6 +528,7 @@ class Population:
                 assert (
                     self.individuals[self.bfi].fitness(self.equivalences, False) == 9999
                 )
+                print("Solution found in population.py: check()\n")
                 self.individuals[self.bfi].show(self.paths)
                 return True
             else:
@@ -568,6 +569,8 @@ class Population:
             0.7 * self.eons
         )  # the epoch after which we want softmax() to be the main normalizing function.
         for i in range(1, self.eons):
+            if i % int(0.15 * self.eons) == 0:
+                print(f"{i}th / {self.eons} generation")
             self.c_count = i
             if found == False:
                 if self.just_initialized == False:
