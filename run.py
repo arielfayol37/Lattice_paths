@@ -125,7 +125,7 @@ def runtime_data():
             wb["Sheet"].cell(2 + index, 1).value = j
             wb["Sheet"].cell(2 + index, 2).value = f'{runtime} seconds'
             wb["Sheet"].cell(2 + index, 3).value = target - 1
-            wb.save()
+            wb.save(filename)
 
 def search(
     size,
