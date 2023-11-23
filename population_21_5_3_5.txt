@@ -1,0 +1,56 @@
+
+
+
+ Not a perfect solution, best fitness: 1.0                        population_21_5_3_5 :population_numDistinctPaths_m_n_k, runtime: 55670.810933426954 seconds
+EEEEENNN   48
+EEEENNNE   52
+EEENENEN   55
+EEENNNEE   23
+EENEEENN   14
+EENENENE   34
+EENNEEEN   45
+EENNEEEN   22
+EENNNEEE   9
+ENEEENNE   31
+ENEENEEN   16
+ENENENEE   36
+ENNEEENE   3
+ENNNEEEE   19
+NEEEENEN   10
+NEEENNEE   5
+NEENEENE   16
+NENEEEEN   42
+NENENEEE   0
+NNEEENEE   40
+NNNEEEEE   28
+
+
+
+
+
+
+ Not a perfect solution, best fitness: 1.0                        population_21_5_3_5 :population_numDistinctPaths_m_n_k, runtime: 55121.28081677202 seconds
+EEEEENNN   34
+EEEENNNE   3
+EEENENEN   42
+EEENNNEE   28
+EENEEENN   0
+EENENENE   14
+EENNEEEN   16
+EENNNEEE   40
+ENEEENNE   23
+ENEENEEN   19
+ENEENEEN   31
+ENENENEE   9
+ENNEEENE   5
+ENNNEEEE   45
+NEEEENEN   55
+NEEENNEE   10
+NEENEENE   36
+NENEEEEN   52
+NENENEEE   23
+NNEEENEE   22
+NNNEEEEE   48
+
+
+

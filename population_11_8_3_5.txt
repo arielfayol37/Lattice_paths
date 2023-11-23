@@ -1,0 +1,18 @@
+
+
+
+ Not a perfect solution, best fitness: 1.0                        population_11_8_3_5 :population_numDistinctPaths_m_n_k, runtime: 52694.13353610877 seconds
+EEEEEEEENNN   120
+EEEEEEENENN   138
+EEEENEEENNE   116
+EEENENEENEE   164
+EENENEEEEEN   91
+ENEEEENEENE   22
+ENNEEENEEEE   47
+NEEEEEEEENN   0
+NEEENEENEEE   157
+NNEEEEEEENE   71
+NNNEEEEEEEE   1
+
+
+

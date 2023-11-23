@@ -1,0 +1,54 @@
+
+
+
+ Perfect solution population_11_5_3_5: population_numDistinctPaths_m_n_k runtime:150.10047547565773 
+EEEEENNN   0
+EEENENEN   5
+EENEEENN   10
+EENENENE   14
+EENNENEE   18
+ENEEENNE   22
+ENNNEEEE   34
+NEENNEEE   44
+NENEEEEN   45
+NNEEEENE   51
+NNNEEEEE   55
+
+
+
+
+
+
+ Perfect solution population_11_5_3_5: population_numDistinctPaths_m_n_k runtime:150.10048941290006 
+EEEEENNN   0
+EEEENNNE   3
+EEENENEN   5
+EEENNNEE   9
+EENEEENN   10
+EENENENE   14
+EENNEEEN   16
+ENNNEEEE   34
+NEEEENEN   36
+NENEEEEN   45
+NNEEENEE   52
+
+
+
+
+
+
+ Perfect solution population_11_5_3_5: population_numDistinctPaths_m_n_k runtime:150.1004991279915 
+EEEENNEN   2
+EEENNNEE   9
+EENENEEN   13
+ENENENEE   28
+ENNEEEEN   30
+ENNENEEE   33
+NEEEEENN   35
+NEEENENE   39
+NEENEEEN   41
+NEENNEEE   44
+NNEEEENE   51
+
+
+

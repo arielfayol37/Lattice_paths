@@ -1,0 +1,12 @@
+
+
+
+ Perfect solution population_5_8_3_5: population_numDistinctPaths_m_n_k runtime:240.10066807968542 
+EEEEEEENENN   1
+EEENNEEEEEN   50
+EENEEEEENEN   57
+EENNEENEEEE   81
+NENNEEEEEEE   155
+
+
+

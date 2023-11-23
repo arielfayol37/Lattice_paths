@@ -1,0 +1,40 @@
+
+
+
+ Perfect solution population_3_5_3_5: population_numDistinctPaths_m_n_k runtime:150.10052216378972 
+EEEENNNE   3
+ENEENEEN   23
+NENNEEEE   49
+
+
+
+
+
+
+ Perfect solution population_3_5_3_5: population_numDistinctPaths_m_n_k runtime:150.05764849390835 
+EEENEENN   4
+EENNEENE   17
+ENENEEEN   26
+
+
+
+
+
+
+ Perfect solution population_3_5_3_5: population_numDistinctPaths_m_n_k runtime:150.03548511117697 
+EEENEENN   4
+ENNNEEEE   34
+NEEEEENN   35
+
+
+
+
+
+
+ Perfect solution population_3_5_3_5: population_numDistinctPaths_m_n_k runtime:150.1001798538491 
+ENEEENEN   21
+NEEENNEE   40
+NENENEEE   48
+
+
+
