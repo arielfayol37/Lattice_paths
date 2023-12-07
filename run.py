@@ -730,6 +730,7 @@ if __name__ == '__main__':
     # Hence, you can make this data collection way quicker if you ran the rows or individual entries(even better)
     # of the tables we are trying to generate by running parallel_search() in parallel with different arguments(the dimension
     # of the entry)
+    collect_data_greedy(3,3)
     collect_data_genetic(3,3)
 
 
