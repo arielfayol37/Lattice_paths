@@ -1,201 +1,392 @@
+# Lattice Paths Genetic Algorithm
 
+A sophisticated genetic algorithm implementation for finding maximum sets of k-distinct lattice paths. This project addresses optimization problems in graph theory, circuit design, scheduling, routing, and network data transmission by efficiently identifying optimal path configurations in lattice structures.
 
-# Sample Run:
-**Some modules you need to install on your own computer: **
-pebble, openpyxl, pickle, and numpy 
+## 🎯 Project Overview
 
-***Application***
+This research project employs advanced genetic algorithms to solve the k-distinct lattice paths problem, building upon previous work by Gillman et al. The algorithm overcomes computational limitations of traditional brute-force techniques, providing an efficient approach to finding maximum sets of paths that share at most (k-1) edges.
 
-You can optimized many processes using a Genetic Algorithm. For this program in particular, you can use it in graph theory or almost anything that deals with paths in lattice. For example in circuit design, you could can define one point of a circuit as a start point, and another as an end point. For this particular code, the definition of a path may not fit you but can easily change it to your convenience, as well as the fitness function.
+### Key Features
 
-Open run.py and run the file. In order to attempt for example to find 7 paths for a 4 by 3 lattice with k = 3, that is that they share at most (k-1) edges, you can execute the line "search(size = 1000, target = 7, m = 4, n = 3, k = 3, visualize = True)" to initiate a search with a population size of 1000. It will take less than 3 seconds to find the solution, then display it on your screen. I bet you won't be ablleto find 7 paths that share at most 2 edges if you tried yourself. You could also run "parallel_search(target = 7, m = 4, n = 3, k = 3)" which will instead run multiple searches in parallel to maximize the probability of finding the solution.
+- **Genetic Algorithm Optimization**: Advanced evolutionary computation with fitness scaling and divergence-based selection
+- **Parallel Processing**: Multi-core execution for improved search efficiency
+- **Visualization**: Turtle graphics for path visualization and lattice representation
+- **Flexible Configuration**: Customizable parameters for different problem instances
+- **Data Collection**: Excel-based data storage and analysis capabilities
 
+## 📋 Installation & Setup
 
-Sequence.py is used to represent a path.
-Genome.py is used to represent a set of paths.
-Population.py is used to simulate the evolution of a group of Genomes.
-run.py is a wrapper used to collect the data.
-lp_utils.py is a module for useful utilities in the program.
-drawing_paths.py is used for visualization.
+### Step 1: Install Python Dependencies
 
-***Genetic Algorithm
-To find the maximum number 
-Of k-distinct paths for an 
-m by n lattice by  FAYOL ATEUFACK ZEUDOM.***
+```bash
+# Install required packages
+pip install pebble openpyxl numpy
 
-***ABSTRACT***
+# Verify installation
+python -c "import pebble, openpyxl, numpy; print('All packages installed successfully!')"
+```
 
-This research employs a genetic algorithm to efficiently identify maximum sets of k-distinct lattice paths, which can be used in optimizing solutions for scheduling problems, routing problems, and data transmission in network systems. Building upon the previous work by Gillman et al., our method overcomes the computational limitations of traditional brute-force techniques, providing a more effective approach. The adaptability and potential of our methodology in tackling various optimization problems make it a valuable foundation for future research and applications.
+### Step 2: Clone or Download the Project
 
+```bash
+# If using git
+git clone <repository-url>
+cd Lattice_paths
 
+# Or simply download and extract the files to a folder
+```
 
-# Definitions
+### Step 3: Test Basic Functionality
 
-**The coordinates of corners of a lattice:**
-	Given a lattice with m rows and n columns, the bottommost left corner has coordinates (0,0) and the topmost right corner has coordinates (m,n).
+```python
+# Test if everything works
+python -c "
+from run import search
+print('Testing basic search...')
+result = search(size=100, target=3, m=2, n=2, k=2, visualize=False)
+print('Test completed successfully!')
+"
+```
 
-**A path(gene):**
-	A path begins at (0,0) and ends at (m,n) and is restricted to East (1) or North (0) moves. Hence all the possible paths have the same length and there are C = n combinations of (m+n).   The set of all such paths is denoted {C}.
+## 🚀 Quick Start Guide
 
-These paths can be denoted by several different notations.  For example,  a path in a 3 by 2 lattice is ENNEN or 001 010 110 211 220.  For the second form, the first two digits of each element represent the coordinates of the node while the third represents the move, so that 001 means ‘from coordinate (0,0), move East (1).’ 
+### Your First Run
 
-The choice of notation has implications for both narrative description of a path and the ease of coding the path, because the first facilitates human visualization, while the second facilitates computation by giving one and only one term for each edge. For example, the paths ENNNE and EENNN share only the first edge, but it is hard to tell just by looking at the sequence. Hence, using the first notation, comparing two paths means for every i-th edge in the paths (represented by an N or an E), we only know whether those two edges are the same by counting the number of Es or Ns before them. The second notation in contrast makes it very easy to compare two paths. For the very example given above, the second notation for the two paths would be 001 010 110 210 311 and 001 011 020 120 220 clearly showing that they only share the first edge.
+1. **Open a Python terminal or create a script file**
 
-**k-distinct paths:**
-	Any two paths are said to be k-distinct if they share at most k-1 edges. Otherwise, they are considered k-equivalent.
+2. **Try this simple example:**
+```python
+from run import search
 
-**Chromosome(Individual):**
-	A chromosome or individual is a set of genes(paths).
+# Find 3 paths in a 2x2 lattice with k=2
+result = search(
+    size=200,       # Small population for quick testing
+    target=3,       # Number of paths to find
+    m=2,           # 2 rows
+    n=2,           # 2 columns
+    k=2,           # Paths can share at most 1 edge
+    visualize=True # Show the result graphically
+)
+```
 
-**Solution:**
-	A chromosome which has genes that are all k-distinct to each other.
+3. **What you should see:**
+   - A turtle graphics window showing the lattice and paths
+   - Console output with fitness information
+   - The algorithm will find 3 paths that share at most 1 edge
 
+### Understanding the Parameters
 
+- **`size`**: Population size (larger = better results but slower)
+- **`target`**: Number of k-distinct paths you want to find
+- **`m, n`**: Lattice dimensions (m rows, n columns)
+- **`k`**: Maximum shared edges + 1 (k=2 means paths share ≤1 edge)
+- **`visualize`**: Show graphical result (True/False)
 
-**Fitness:**
-	The fitness of a chromosome(individual) is an integer number that represents how ‘fit’, or close to the solution, an individual is. It is the number of pair-wise k-distinct paths an individual has.
-To determine a chromosome’s fitness, every path is compared to the others and the number of times where the paths were k-distinct is the fitness. For example, an individual with t paths, there will be t(t-1)/2 comparisons, which is also the maximum fitness. Any individual with a maximum fitness has all its paths distinct to every other, hence a solution.
+## 🏗️ Project Structure
 
-**Population:**
-	A set of chromosomes(individuals).
+```
+Lattice_paths/
+├── run.py              # 🚀 Start here - Main interface
+├── Population.py       # 🧬 Genetic algorithm engine
+├── Genome.py          # 🧬 Individual representation
+├── Sequence.py        # 🛤️ Path representation
+├── lp_utils.py        # 🔧 Utility functions
+├── drawing_paths.py   # 🎨 Visualization module
+└── README.md          # 📖 This file
+```
 
-A genetic algorithm starts with an initial generation and then uses an evolutionary process to create subsequent generations, which will get progressively closer to the solution.The following sections describe this evolutionary process. 
+## 📖 Understanding the Problem
 
-**Evolution:**
-	Optimization process by which the program finds the solution by mating the population at each generation to produce new fitter individuals. The process is briefly summarized by the following algorithm.
+### What is a Lattice Path?
 
-#Algorithm (Simple/Brief Overview):
-We initialize the number of distinct paths(target) we are looking for, t, the initial size of the population, pi, the maximum size of the population, pm, the number of generations, g, dimensions of the lattice of the lattice m and n, and k. 
+Imagine a grid (lattice) with m rows and n columns:
+```
+(0,0) → → → (0,n)
+  ↓         ↓
+  ↓         ↓
+(m,0) → → → (m,n)
+```
 
-Randomly generate pi individuals with each having t number of  paths. 
-Calculate each individual’s fitness and divergence.
-Mate the individuals with respect to their respective mating probabilities which depends on their fitness and divergence.
-Children are randomly and semi-randomly mutated.
-While the population size is above pm, pick individuals at random and ‘kill’ the one with lower fitness
-Repeat 2) to 5) g-times or stop when someone has a fitness of infinity.
-If nobody had a fitness of infinity at 6), then return (t-1) as the maximum number of k-distinct paths.
-	Else, increment s by one and repeat 1) to 6).
+A **path** starts at (0,0) and ends at (m,n), moving only:
+- **East (→)**: Right
+- **North (↑)**: Up
 
+### What are k-Distinct Paths?
 
+Two paths are **k-distinct** if they share at most (k-1) edges.
 
+**Important**: k-distinctness is hierarchical:
+- If paths are k-distinct, they are also (k+1)-distinct, (k+2)-distinct, etc.
+- The challenge is finding the **maximum** number of paths that are k-distinct
 
-# More precise definitions and description of the Algorithm
+**Example with k=2:**
+- Path A: →→↑↑ (shares 1 edge with Path B)
+- Path B: →↑→↑ (shares 1 edge with Path A)
+- These are 2-distinct (share ≤1 edge)
+- They are also 3-distinct, 4-distinct, etc.
 
-**Divergence:**
-A measure of how different a chromosome(set of genes) is from the rest of the population.
-At each generation, the distribution of C(all the paths) over the population is calculated. For example, a path Pj from C, can be at maximum in all individuals, and at minimum in none. So a measure of how Pj is distributed in the population is the proportion of individuals that has the path. This is done for every path in C. Then the divergence of an individual is (1 - average of the distribution of its paths).
+**Example with k=3:**
+- Path A: →→↑↑ (shares 2 edges with Path C)
+- Path C: →→↑↑ (shares 2 edges with Path A)
+- These are 3-distinct (share ≤2 edges)
+- They are also 4-distinct, 5-distinct, etc.
 
-**Mating Probability:**
-The mating probability of an individual is a probability that determines how likely an individual is going to be selected for mating. It is a function of the fitness and divergence of an individual.
+**The Problem**: Find the maximum number of paths that are k-distinct from each other.
 
-**Crossover(mating):**
-When two parents are selected to mate, the new chromosome(individual) they produce is just a product of the exchange of genes of the parents. How does this exchange happen? Thinking about the chromosomes as a sequence of genes, a random point is selected along the sequence and the genes before that point will be taken from one parent, and the genes after it will be taken from the other parent. The combination of those will be the new individual. 
+## 🧬 How the Genetic Algorithm Works
 
-**d)	Crossover frequency:**
-	How often crossover(mating) happens. Ranges from 0 percent to 100 percent, where 0 percent means the population of the next generation is just a copy of the current generation, while 100 percent means the population of the next generation will just be products of crossovers.
+### The Big Picture
 
-**e)  Mutation:**
-A chromosome has one of its genes randomly swapped for another in the set of all possible paths.
- 
-**Mate Selection Process: Remainder Stochastic Sampling Without Replacement**
-Normalize the mating probabilities of the population.
-Create r slots for the mating pool. r = crossover frequency * 2.
-To fill the slots, for each individual, we give the whole number part of its mating probability as the number of slots. Then we perform a Bernoulli trial on the decimal part to determine whether or not we should give an additional slot to the individual.
-Then we select couples at random from the mating pool and produce 3 children.
-		The first two children result from cross-overs of genes(paths) and mutation, making sure the children’s genes are all distinct.
-		The third one is a product of sheer cross-over with no mutation, and can have repeated genes(paths).
+The algorithm tries to find the **maximum number** of paths that can coexist while being k-distinct from each other.
 
-**More on mutation**
-	
-Since we can know which genes are k-equivalent to others, we can exploit that to increase the pace of the search.
-For the first child, the mutation is semi-random: only paths that are k-equivalent with another or others are mutated.
-	For the second child, the mutation is fully random. Any path is selected at random and swapped for another from C(the set of all paths).
-	The third child has no mutation.
+1. **Create Population**: Generate random sets of paths
+2. **Evaluate Fitness**: Count how many pairs are k-distinct
+3. **Select Parents**: Choose better individuals to reproduce
+4. **Create Children**: Combine and mutate parent paths
+5. **Repeat**: Until finding a perfect solution or time runs out
 
+### What Makes This Hard?
 
-# Refinements
+- **Combinatorial Explosion**: The number of possible paths grows exponentially
+- **Constraint Satisfaction**: Every pair must be k-distinct
+- **Optimization**: We want the maximum possible number of paths
+- **Trade-offs**: More paths = harder to satisfy k-distinctness
 
-During evolution, the main problems the program might encounter to find the maximum solution are early convergence and low fitness variation. Convergence is when almost all the individuals in the population become similar, while low fitness variation occurs when the average fitness is close to the maximum fitness(optimal solution).
+### Key Concepts
 
-**Early convergence:** at the start of the evolution, suppose an individual has a significantly higher fitness, though probably not the optimal solution. This will lead to an unusually high mating probability for that individual and will lead the population to converge towards this individual, since it mates more often and its offspring are likely to be him, with high but not optimal fitness.
- 
-**Low fitness variation:** after many generations, the average population fitness increases and stagnates. The differences in individual fitnesses will be very small, even if there is a high divergence, thereby slowing down the improvement in the evolution towards the maximum fitness since no individual is particularly fitter than the others. 
+#### Fitness Function
+- Perfect solution = all path pairs are k-distinct
+- Fitness = 9999 for perfect solutions
+- Otherwise, fitness = 1/(number of k-equivalent pairs)
 
-To address these problems, we introduce 
+#### Selection Strategy
+- **Fitness-based**: Better individuals have higher chance to reproduce
+- **Diversity-based**: Prevents getting stuck in local optima
+- **Scaling**: Adjusts fitness values to maintain population diversity
 
-**Linear fitness scaling.** So rather than using the raw fitness to calculate the mating probabilities, we scale them at every generation such that for the first generations, the maximum fitness is scaled to be just slightly above the average fitness and after many generations, it is scaled to be much higher than the average fitness. Also, we also want to ensure that the average scaled fitness of the population is the same as the average raw fitnesses. 
+## 📊 Practical Examples
 
-Hence our scaling is of the form:
-	Scaled fitness = fitness * ai + bi
-	
-**Scaling conditions:**
-	Maximum scaled fitness = Average fitness * vi 
-Average scaled fitness = Average fitness
-Minimum scaled fitness = 0
+### Example 1: Small Problem (Quick Test)
+```python
+from run import search
 
-Using the conditions described above, we solve the system of equations at every generation to obtain ai and bi (prescale). Also, to avoid having negative scaled fitness values, we ensure that minimum scaled fitness is 0.
+# 2x2 lattice, find 3 paths, k=2 (paths share at most 1 edge)
+result = search(size=200, target=3, m=2, n=2, k=2, visualize=True)
+print(f"Best fitness: {result.fitnesses[result.bfi]}")
+```
 
+### Example 2: Medium Problem (Realistic)
+```python
+from run import search
 
-	
-	vi = d + (v - d)*(i/g), where d is a number between 1.5 and 2;
-					  i is the number of generations that have passed; 
-						  g is the total number of generations;
-						  v represents speed, which is the factor by 
-						  we want to scale the average fitness at the
-last generation to get the maximum scaled fitness
-Divergence to make the evolution more robust to early convergence as well, by using chromosomes’ divergences, in addition to their fitnesses, to calculate the mating probability.
+# 4x3 lattice, find 7 paths, k=3 (paths share at most 2 edges)
+result = search(size=1000, target=7, m=4, n=3, k=3, visualize=True)
+if result.fitnesses[result.bfi] == 9999:
+    print("Perfect solution found!")
+else:
+    print("No perfect solution found")
+```
 
+### Example 3: Parallel Search (Best Results)
+```python
+from run import parallel_search
 
-**Mating Probability of an individual = Scaled fitness * u + Divergence * (1 - u) *max_scaled_fitness**
-		
-where u is a real number in the range [0,1].
-We chose u = 0.5, to give equal importance to the fitness and the divergence. 
+# Use multiple cores for better results
+success, config = parallel_search(target=7, m=4, n=3, k=3)
+if success:
+    print(f"Solution found with configuration {config}")
+else:
+    print("No solution found - try increasing target")
+```
 
+### Example 4: Data Collection
+```python
+from run import collect_data_genetic
 
-#Full Algorithm:
+# Generate comprehensive results table
+collect_data_genetic(m=4, n=3)
+# This creates Excel files with results
+```
 
-We initialize the number of distinct paths we are looking for, t, the initial size of the population, pi, the maximum size of the population, pm, the number of generations, g, the speed, v, dimensions of the lattice of the lattice m and n, and k. 
+## ⚙️ Configuration Guide
 
-Randomly generate pi individuals with each having t number of  paths. 
-Compute the average raw fitness of the population and the distribution of all the paths.
-Prescale.
-Compute the scaled fitnesses of each individual.
-Compute the divergence of each individual.
-Compute the mating probabilities, taking u= 0.5.
-Mate the individuals and mutate their children using remainder stochastic sampling without replacement.
-While the population size is above pm, pick individuals at random and ‘kill’ the one with lower fitness
+### Population Settings
 
-Repeat 2) to 8) e-times or stop when someone has a fitness of infinity, and refill the population with some randomly generated individuals every 50 generations to maintain the diversity of the gene pool.
-If nobody had a fitness of infinity at 9), then return s as the maximum number of k-distinct paths.
-	Else, increment s by one and repeat 1) to 9).
+| Problem Size | Population | Temperature | Generations |
+|-------------|------------|-------------|-------------|
+| Small (≤5×5) | 500-1000   | 3-5         | m×n×k×500   |
+| Medium (≤10×10) | 1000-5000 | 4-7         | m×n×k×700   |
+| Large (>10×10) | 5000-10000 | 5-10        | m×n×k×1000  |
 
+### Parameter Explanations
 
+- **`size`**: More individuals = better exploration but slower
+- **`temperature`**: Higher = more exploration, Lower = more exploitation
+- **`crossover_freq`**: How often parents exchange genes (default: 0.7)
+- **`kill_mode`**: How to reduce population size (default: "non_bias_random")
 
-# Exploiting Multiple Cores:
-	Due to the random nature of this search, we go further by implementing the above algorithm on different cores(ecosystems). Using smaller values for v like 3 makes the process explore more of the search space, but might take too much time to find the solution. Hence, we can use different cores to simulate different ecosystems with different values of v. As such, the ecosystems with higher values of v can find the solution quickly if it is an easy one and those with smaller values of v will explore more if it is a difficult solution. 
-	So we create 5 different populations with different sizes and final temperatures, then run them in parallel.
-Create 5 different populations with different sizes and values of v.
-Run the previous algorithm in parallel on each of them
-When any of the populations finds the perfect individual, increment t (the number of k-distinct paths to search) by 1, and restart the search in the different ecosystems
-If none of the ecosystems find the perfect individual, merge the populations and run the search algorithm with the combined advanced populations.
-If 4) still does not find a perfect individual, then the maximum number of k-distinct paths is t-1.
+## 🔧 Advanced Usage
 
+### Custom Problem Setup
+```python
+from run import search
 
-**Choice of initial values:**
+# Custom parameters for your specific problem
+result = search(
+    size=2000,           # Large population
+    target=10,           # Find 10 paths
+    m=5,                # 5 rows
+    n=4,                # 4 columns
+    k=3,                # Share ≤2 edges
+    kill_mode="non_bias_random",
+    mode="roulette",
+    norm=True,
+    scale=True,
+    visualize=True,
+    temp=5.0
+)
+```
 
-**a) Max population size, pm:**
-	The bigger the population size, the greater the diversity, but the evolution will take a longer time to find the solution. On the other hand, the smaller the population size, the less likely the algorithm will find the solution due to early convergence.
-Upon experimentation, population sizes of 500-1000 tend to work well.
+### Save and Load Results
+```python
+from run import save_object, read_object
 
-**b)Target, t:**
-Relying on the mathematical proofs and data collected from previous research by Gillman et Al, we don’t need to start the genetic algorithm with a value 1, before incrementing progressively. We just use the values from these previous research as our initial targets, then keep incrementing the target.
-	
-**c)The number of generations, g:**
-	Upon experimentation, the number of generations needed to find the solution is a function of the dimensions of the lattice and the value of k. A function that works well is g = m * n * k * 700.
+# Save a successful population
+save_object(result, "my_solution")
 
-*Alternatively, we could just make the program such that it stops if after a certain number of generations there is no improvement, it stops.*
-	
-**References:**
-Genetic Algorithms in Search, Optimization, and Machine Learning by David Goldeberg
-Gillman, Rick,et al “On the Edge Set of Graphs and Lattice Paths” International Journal of Mathematics and Mathematical Sciences
+# Load it later
+loaded_result = read_object("my_solution", showBestIndividual=True)
+```
+
+### Custom Visualization
+```python
+from drawing_paths import draw_lattice, draw_path
+
+# Draw empty lattice
+draw_lattice(m=4, n=3)
+
+# Draw specific paths
+for i, path in enumerate(best_paths):
+    draw_path(path, m=4, n=3, o=0, index=i)
+```
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+#### 1. Import Errors
+```bash
+# If you get "ModuleNotFoundError"
+pip install pebble openpyxl numpy
+```
+
+#### 2. Turtle Graphics Not Working
+```python
+# If visualization doesn't appear
+import turtle
+turtle.Screen()  # Test if turtle works
+```
+
+#### 3. Memory Issues
+```python
+# If you get memory errors, reduce population size
+result = search(size=500, target=5, m=3, n=3, k=2)  # Smaller size
+```
+
+#### 4. No Solution Found
+```python
+# Try different parameters
+result = search(size=2000, target=5, m=3, n=3, k=2, temp=6.0)  # Larger population, higher temp
+```
+
+#### 5. Slow Performance
+```python
+# Use parallel search for better results
+success, config = parallel_search(target=5, m=3, n=3, k=2)
+```
+
+### Performance Tips
+
+1. **Start Small**: Test with small lattices first
+2. **Use Parallel Search**: Better results with multiple cores
+3. **Adjust Population Size**: Larger = better but slower
+4. **Monitor Memory**: Large populations need more RAM
+5. **Save Results**: Use `save_object()` for important findings
+
+## 📈 Understanding Results
+
+### Fitness Values
+- **9999**: Perfect solution found
+- **0.1-1.0**: Good solution (few k-equivalent pairs)
+- **0.01-0.1**: Poor solution (many k-equivalent pairs)
+
+### Population Statistics
+```python
+# Check population health
+print(f"Best fitness: {result.fitnesses[result.bfi]}")
+print(f"Average fitness: {sum(result.fitnesses)/len(result.fitnesses)}")
+print(f"Population size: {len(result.individuals)}")
+```
+
+### Visual Interpretation
+- **Green paths**: Good solutions
+- **Red paths**: K-equivalent pairs
+- **Lattice grid**: Problem boundaries
+
+## 🧪 Testing Your Understanding
+
+### Test 1: Basic Functionality
+```python
+# Should find 3 paths easily
+result = search(size=100, target=3, m=2, n=2, k=2, visualize=True)
+assert result.fitnesses[result.bfi] == 9999, "Should find perfect solution"
+```
+
+### Test 2: Impossible Problem
+```python
+# Should NOT find 10 paths in 2x2 lattice with k=2 (impossible due to limited paths)
+result = search(size=500, target=10, m=2, n=2, k=2, visualize=False)
+assert result.fitnesses[result.bfi] < 9999, "Should not find impossible solution"
+```
+
+### Test 3: Parallel Processing
+```python
+# Test parallel search
+success, config = parallel_search(target=5, m=3, n=3, k=2)
+print(f"Parallel search {'succeeded' if success else 'failed'}")
+```
+
+## 📚 References & Further Reading
+
+1. Goldberg, D. E. (1989). *Genetic Algorithms in Search, Optimization, and Machine Learning*
+2. Gillman, R., et al. (2004). "On the Edge Set of Graphs and Lattice Paths" *International Journal of Mathematics and Mathematical Sciences*
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Implement your changes
+4. Add tests for new functionality
+5. Submit a pull request
+
+## 📄 License
+
+This project is for research purposes. Please cite the original research when using this code.
+
+## 👨‍💻 Author
+
+**FAYOL ATEUFACK ZEUDOM**
+
+This implementation represents significant advances in genetic algorithm optimization for lattice path problems, providing efficient solutions to complex combinatorial optimization challenges.
+
+---
+
+## 🆘 Need Help?
+
+- **Check the code comments** in each module for detailed explanations
+- **Start with small examples** to understand the system
+- **Use the test functions** to verify your understanding
+- **Experiment with parameters** to see how they affect results
+
+*For questions, issues, or contributions, please contact me at arielfayol1@gmail.com or refer to the code comments and documentation within each module.*
 
