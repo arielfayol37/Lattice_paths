@@ -270,7 +270,7 @@ draw_lattice(m=4, n=3)
 # Draw specific paths
 for i, path in enumerate(best_paths):
     draw_path(path, m=4, n=3, o=0, index=i)
-``
+```
 
 ## 📈 Understanding Results
 
