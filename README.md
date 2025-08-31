@@ -278,6 +278,7 @@ for i, path in enumerate(best_paths):
 - **9999**: Perfect solution found
 - **0.1-1.0**: Good solution (few k-equivalent pairs)
 - **0.01-0.1**: Poor solution (many k-equivalent pairs)
+```
 
 ### Population Statistics
 ```python
