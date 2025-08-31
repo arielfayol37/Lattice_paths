@@ -1,6 +1,8 @@
 # Lattice Paths Genetic Algorithm
-Paper Link: https://github.com/arielfayol37/Resume/blob/main/lattice_paths.pdf
+
 A sophisticated genetic algorithm implementation for finding maximum sets of k-distinct lattice paths. This project addresses optimization problems in graph theory, circuit design, scheduling, routing, and network data transmission by efficiently identifying optimal path configurations in lattice structures.
+
+[Read paper](https://arielfayol.com/view_pdf/lattice_paths)
 
 ## 🎯 Project Overview
 
@@ -30,7 +32,7 @@ python -c "import pebble, openpyxl, numpy; print('All packages installed success
 
 ```bash
 # If using git
-git clone <repository-url>
+git clone https://github.com/arielfayol37/Lattice_paths
 cd Lattice_paths
 
 # Or simply download and extract the files to a folder
