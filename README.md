@@ -268,50 +268,7 @@ draw_lattice(m=4, n=3)
 # Draw specific paths
 for i, path in enumerate(best_paths):
     draw_path(path, m=4, n=3, o=0, index=i)
-```
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-#### 1. Import Errors
-```bash
-# If you get "ModuleNotFoundError"
-pip install pebble openpyxl numpy
-```
-
-#### 2. Turtle Graphics Not Working
-```python
-# If visualization doesn't appear
-import turtle
-turtle.Screen()  # Test if turtle works
-```
-
-#### 3. Memory Issues
-```python
-# If you get memory errors, reduce population size
-result = search(size=500, target=5, m=3, n=3, k=2)  # Smaller size
-```
-
-#### 4. No Solution Found
-```python
-# Try different parameters
-result = search(size=2000, target=5, m=3, n=3, k=2, temp=6.0)  # Larger population, higher temp
-```
-
-#### 5. Slow Performance
-```python
-# Use parallel search for better results
-success, config = parallel_search(target=5, m=3, n=3, k=2)
-```
-
-### Performance Tips
-
-1. **Start Small**: Test with small lattices first
-2. **Use Parallel Search**: Better results with multiple cores
-3. **Adjust Population Size**: Larger = better but slower
-4. **Monitor Memory**: Large populations need more RAM
-5. **Save Results**: Use `save_object()` for important findings
+``
 
 ## 📈 Understanding Results
 
@@ -355,38 +312,4 @@ assert result.fitnesses[result.bfi] < 9999, "Should not find impossible solution
 success, config = parallel_search(target=5, m=3, n=3, k=2)
 print(f"Parallel search {'succeeded' if success else 'failed'}")
 ```
-
-## 📚 References & Further Reading
-
-1. Goldberg, D. E. (1989). *Genetic Algorithms in Search, Optimization, and Machine Learning*
-2. Gillman, R., et al. (2004). "On the Edge Set of Graphs and Lattice Paths" *International Journal of Mathematics and Mathematical Sciences*
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Implement your changes
-4. Add tests for new functionality
-5. Submit a pull request
-
-## 📄 License
-
-This project is for research purposes. Please cite the original research when using this code.
-
-## 👨‍💻 Author
-
-**FAYOL ATEUFACK ZEUDOM**
-
-This implementation represents significant advances in genetic algorithm optimization for lattice path problems, providing efficient solutions to complex combinatorial optimization challenges.
-
----
-
-## 🆘 Need Help?
-
-- **Check the code comments** in each module for detailed explanations
-- **Start with small examples** to understand the system
-- **Use the test functions** to verify your understanding
-- **Experiment with parameters** to see how they affect results
-
-*For questions, issues, or contributions, please contact me at arielfayol1@gmail.com or refer to the code comments and documentation within each module.*
 
