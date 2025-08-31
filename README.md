@@ -1,6 +1,6 @@
 # Lattice Paths Genetic Algorithm
 
-A sophisticated genetic algorithm implementation for finding maximum sets of k-distinct lattice paths. This project addresses optimization problems in graph theory, circuit design, scheduling, routing, and network data transmission by efficiently identifying optimal path configurations in lattice structures.
+A  genetic algorithm implementation for finding maximum sets of k-distinct lattice paths. This project addresses optimization problems in graph theory, circuit design, scheduling, routing, and network data transmission by efficiently identifying optimal path configurations in lattice structures.
 
 [Read paper](https://arielfayol.com/view_pdf/lattice_paths)
 
